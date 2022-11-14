@@ -2,9 +2,9 @@ version: 1.0.0
 services:
   api:
     platform: 'linux/amd64'
-    build:
-      context: .
-      dockerfile: Dockerfile
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
       target: production
     ports:
       - '4000:4000'
