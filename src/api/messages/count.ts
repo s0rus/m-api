@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import express from 'express';
-import { MessageCountData } from 'src/interfaces/MessageCount';
+import { MessageCountData, Record } from 'src/interfaces/MessageCount';
 import { prisma } from '../..';
 
 const countRouter = express.Router();
@@ -11,31 +11,36 @@ countRouter.get<{}, MessageCountData>('/', async (req, res) => {
 
     const parseRecords = () => {
       return records
-        .map((record) => {
+        .map((record: { id: string; count: number; date: string }) => {
           return {
             ...record,
             date: dayjs(record.date).add(1, 'day').toDate(),
           };
         })
-        .sort((a, b) => a.date.getTime() - b.date.getTime());
+        .sort((a: Record, b: Record) => a.date.getTime() - b.date.getTime());
     };
 
     const data = parseRecords();
+    const dataWithoutToday = data.slice(0, -1);
 
-    const todaysCount = [...records].pop()?.count || 0;
+    console.log(dataWithoutToday);
 
-    const messageCountSum = data.reduce((acc, curr) => {
+    const todaysCount = [...data].pop()?.count || 0;
+
+    const messageCountSum = data.reduce((acc: number, curr: Record) => {
       return acc + curr.count;
     }, 0);
 
-    const maxCount = data.reduce((acc, curr) => (acc > curr.count ? acc : curr.count), 0) || 0;
+    const maxCount =
+      dataWithoutToday.reduce((acc: number, curr: Record) => (acc > curr.count ? acc : curr.count), 0) || 0;
 
-    const minCount = data.reduce((acc, curr) => (acc < curr.count ? acc : curr.count), maxCount) || 0;
+    const minCount =
+      dataWithoutToday.reduce((acc: number, curr: Record) => (acc < curr.count ? acc : curr.count), maxCount) || 0;
 
     const avgCount = messageCountSum / data.length || 0;
 
     res.json({
-      content: [...data],
+      content: [...dataWithoutToday],
       todaysCount,
       maxCount,
       minCount,
