@@ -9,11 +9,16 @@ app.listen(port, () => {
 
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
 
 import { PrismaClient } from '@prisma/client';
-export const prisma = new PrismaClient();
+export const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn'],
+});
 
 const token = process.env.DISCORD_BOT_TOKEN;
+dayjs.extend(timezone);
+dayjs.tz.setDefault('Europe/Warsaw');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
@@ -25,7 +30,7 @@ client.once(Events.ClientReady, () => {
 
 client.on(Events.MessageCreate, async (message) => {
   try {
-    console.log(`${message.author.username}: ${message.content}`);
+    console.log(`[${message.createdAt}] ${message.author.username}: ${message.content}`);
     const update = await prisma.aggregatedData.updateMany({
       data: {
         count: {
@@ -33,14 +38,15 @@ client.on(Events.MessageCreate, async (message) => {
         },
       },
       where: {
-        date: dayjs().format('DD.MM.YYYY'),
+        date: dayjs(new Date()).format('MM.DD.YYYY'),
       },
     });
 
     if (update.count === 0) {
+      console.log(`[${message.createdAt}] ${message.author.username}: ${message.content} - CREATED NEW DATE`);
       await prisma.aggregatedData.create({
         data: {
-          date: dayjs().format('DD.MM.YYYY'),
+          date: dayjs(new Date()).format('MM.DD.YYYY'),
           count: 1,
         },
       });
