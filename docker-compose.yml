@@ -1,4 +1,4 @@
-version: 1.4.2
+version: 1.4.3
 services:
   api:
     platform: 'linux/amd64'
@@ -8,7 +8,7 @@ services:
       target: production
     ports:
       - '5000:5000'
-    image: s0ruse/m-api:1.4.2
+    image: s0ruse/m-api:1.4.3
     environment:
       - DATABASE_URL=mysql://p2do6ju8e9ftxojzqcip:pscale_pw_8szkOPXISmoDcePUCbdn1mUt5hnVZ9urFcNA0AJxWdR@eu-west.connect.psdb.cloud/is-m-dying?sslaccept=strict
       - DISCORD_BOT_TOKEN=OTI3NjIyNjQyMDQ1OTYwMjIz.G8cXlK.6csOgfKsZ7tVru1HoBsWIfVfNpNIQf-bN_qDDg
