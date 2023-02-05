@@ -1,46 +1,14 @@
-import dayjs from 'dayjs';
 import express from 'express';
-import { MessageCountData, Record } from 'src/interfaces/MessageCount';
-import { prisma } from '../..';
+import { fetchMessageCountData } from './../../fetchMessageCountData';
+import { MessageCountData } from '../../interfaces/MessageCount';
 
 const countRouter = express.Router();
 
 countRouter.get<{}, MessageCountData>('/', async (req, res) => {
   try {
-    const records = await prisma.aggregatedData.findMany();
-
-    const parseRecords = () => {
-      return records
-        .map((record: { id: string; count: number; date: string }) => {
-          return {
-            ...record,
-            date: dayjs(record.date).add(1, 'day').toDate(),
-          };
-        })
-        .sort((a: Record, b: Record) => a.date.getTime() - b.date.getTime());
-    };
-
-    const data = parseRecords();
-    const dataWithoutToday = data.slice(0, -1);
-
-    console.log(dataWithoutToday);
-
-    const todaysCount = [...data].pop()?.count || 0;
-
-    const messageCountSum = data.reduce((acc: number, curr: Record) => {
-      return acc + curr.count;
-    }, 0);
-
-    const maxCount =
-      dataWithoutToday.reduce((acc: number, curr: Record) => (acc > curr.count ? acc : curr.count), 0) || 0;
-
-    const minCount =
-      dataWithoutToday.reduce((acc: number, curr: Record) => (acc < curr.count ? acc : curr.count), maxCount) || 0;
-
-    const avgCount = messageCountSum / data.length || 0;
-
+    const { content, todaysCount, maxCount, minCount, avgCount } = await fetchMessageCountData();
     res.json({
-      content: [...dataWithoutToday],
+      content,
       todaysCount,
       maxCount,
       minCount,

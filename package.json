@@ -1,6 +1,6 @@
 {
   "name": "m-api",
-  "version": "1.4.3",
+  "version": "1.4.7a",
   "description": "The M-API",
   "main": "src/index.ts",
   "scripts": {
