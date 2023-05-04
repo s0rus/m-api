@@ -1,5 +1,5 @@
 import express from 'express';
-import { fetchMessageCountData } from './../../fetchMessageCountData';
+import { fetchMessageCountData } from '../../commands/MessageCount/fetchMessageCountData';
 import { MessageCountData } from '../../interfaces/MessageCount';
 
 const countRouter = express.Router();

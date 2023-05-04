@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { prisma } from './index';
-import { MessageCountData, Record } from './interfaces/MessageCount';
+import { prisma } from '../../index';
+import { MessageCountData, Record } from '../../interfaces/MessageCount';
 
 export async function fetchMessageCountData(): Promise<MessageCountData> {
   const records = await prisma.aggregatedData.findMany();

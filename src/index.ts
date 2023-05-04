@@ -6,12 +6,16 @@ app.listen(port, () => {
   console.log(`Listening: http://localhost:${port}`);
 });
 
-import { Client, EmbedBuilder, Events, GatewayIntentBits } from 'discord.js';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
+import { Client, Events, GatewayIntentBits } from 'discord.js';
 
 import { PrismaClient } from '@prisma/client';
-import { fetchMessageCountData } from './fetchMessageCountData';
+import { aha } from './commands/Aha/aha';
+import { ahaList } from './commands/Aha/ahaList';
+import { ahaRandom } from './commands/Aha/ahaRandom';
+import { messageCount } from './commands/MessageCount/messageCount';
+import { COMMANDS, buildCommand } from './const';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -62,30 +66,21 @@ client.on(Events.MessageCreate, async (message) => {
     console.log(error);
   }
 
-  if (message.content === '!w' || message.content === 'ile wiadomosci') {
-    try {
-      const { todaysCount, avgCount } = await fetchMessageCountData();
-
-      console.log(`TODAY: ${todaysCount}`);
-
-      const messageEmbed = new EmbedBuilder()
-        .setColor(0x6c42f5)
-        .setDescription('Dziadkownia')
-        .setThumbnail('https://cdn.discordapp.com/emojis/1047234305191063702.webp?size=96&quality=lossless')
-        .addFields({
-          name: '```Wiadomości dzisiaj```',
-          value: `${JSON.stringify(todaysCount, null, 0)}`,
-          inline: true,
-        })
-        .setFooter({
-          text: `Średnio: ${JSON.stringify(parseFloat(avgCount.toFixed(2)), null, 0)}`,
-          iconURL: 'https://cdn.discordapp.com/emojis/1047234305191063702.webp?size=96&quality=lossless',
-        });
-      message.channel.send({ embeds: [messageEmbed] });
-    } catch (error) {
-      console.log(error);
-      message.channel.send('Wystąpił błąd podczas pobierania danych...');
-    }
+  switch (true) {
+    case buildCommand(COMMANDS.messageCount, message):
+      await messageCount(message);
+      break;
+    case buildCommand(COMMANDS.ahaRandom, message):
+      await ahaRandom(message);
+      break;
+    case buildCommand(COMMANDS.ahaList, message):
+      await ahaList(message);
+      break;
+    case buildCommand(COMMANDS.aha, message, /^aha[0-9]{1,}/):
+      await aha(message);
+      break;
+    default:
+      break;
   }
 });
 

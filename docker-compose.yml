@@ -1,4 +1,4 @@
-version: 1.4.7a
+version: 2.0.0
 services:
   api:
     platform: 'linux/amd64'
@@ -8,7 +8,7 @@ services:
       target: production
     ports:
       - '5000:5000'
-    image: s0ruse/m-api:1.4.7a
+    image: s0ruse/m-api:2.0.0
     environment:
-      - DATABASE_URL=mysql://u6ysntbeai35184fbojz:pscale_pw_UoINWp5OMa4m8fV0DmrwDfnoYAkJq1oRSFcLHgfejcc@eu-west.connect.psdb.cloud/dziadkownia?sslaccept=strict
+      - API_DATABASE_URL=mysql://u6ysntbeai35184fbojz:pscale_pw_UoINWp5OMa4m8fV0DmrwDfnoYAkJq1oRSFcLHgfejcc@eu-west.connect.psdb.cloud/dziadkownia?sslaccept=strict
       - DISCORD_BOT_TOKEN=MTA1NDc4NDM0MjI1MTAyNDQyNQ.GPlnq9.iu3UFQ7KQA2Z9UNb8SgaFGJ1nLsajNzpMk3V5g
