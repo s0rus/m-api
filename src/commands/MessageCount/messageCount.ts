@@ -1,5 +1,5 @@
 import { EmbedBuilder, Message } from 'discord.js';
-import { COMMANDS } from '../../commandHelpers';
+import { COMMANDS } from '../../helpers/commandHelpers';
 import {
   fetchDayTotalCount,
   getAverageMessageCount,

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { prisma } from '../../index';
-import { COMMANDS } from '../../commandHelpers';
+import { COMMANDS } from '../../helpers/commandHelpers';
 import { EmbedBuilder, Message } from 'discord.js';
 
 export async function fetchDayTotalCount() {

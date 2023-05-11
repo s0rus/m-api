@@ -25,7 +25,6 @@ model User {
   totalMessageCount Int                  @default(0)
 }
 
-
 model MessageAggregation {
   id       String @id @default(cuid())
   dayCount Int    @default(0)

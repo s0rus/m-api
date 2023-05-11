@@ -2,16 +2,14 @@ import app from './app';
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
-  /* eslint-disable no-console */
   console.log(`Listening: http://localhost:${port}`);
 });
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-
 import { PrismaClient } from '@prisma/client';
-import { COMMANDS, buildCommand } from './commandHelpers';
+import { COMMANDS, buildCommand } from './helpers/commandHelpers';
 import { aha } from './commands/Aha/aha';
 import { ahaList } from './commands/Aha/ahaList';
 import { ahaRandom } from './commands/Aha/ahaRandom';
@@ -23,6 +21,7 @@ import {
   incrementMessageCount,
   topMessageCount,
 } from './commands/MessageCount/messageCountManager';
+import handleAvatarUpdate from './helpers/avatarUpdate';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -47,32 +46,7 @@ client.once(Events.ClientReady, async () => {
 });
 
 client.on(Events.MessageCreate, async (message) => {
-  const guild = client.guilds.cache.get('1046777564775067728');
-  if (!guild) return;
-
-  const user = message.author;
-  const member = guild.members.cache.get(user.id);
-  if (!member) return;
-
-  const avatarUrl = user.avatarURL();
-  if (!avatarUrl) return;
-
-  const dbUser = await prisma.user.findUnique({
-    where: { userId: user.id },
-  });
-
-  if (!dbUser) return;
-
-  if (dbUser.avatar !== avatarUrl) {
-    await prisma.user.update({
-      where: { userId: user.id },
-      data: {
-        avatar: avatarUrl,
-      },
-    });
-
-    console.log(dbUser.name, 'avatar has been updated');
-  }
+  await handleAvatarUpdate(client, message);
 });
 
 client.on(Events.MessageCreate, async (message) => {
