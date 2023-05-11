@@ -46,10 +46,9 @@ client.once(Events.ClientReady, async () => {
 });
 
 client.on(Events.MessageCreate, async (message) => {
-  await handleAvatarUpdate(client, message);
-
   try {
     await incrementMessageCount(message);
+    await handleAvatarUpdate(client, message);
   } catch (error) {
     console.log(error);
     message.channel.send('Wystąpił błąd podczas zapisywania wiadomości...');
