@@ -20,8 +20,10 @@ import {
   messageCount,
 } from './commands/MessageCount/messageCount';
 import { updateAvatar } from './commands/MessageCount/avatarUpdate';
-import { incrementMessageCount } from './commands/MessageCount/messageCountManager';
-import { topMessageCount } from './commands/MessageCount/topMessageCount';
+import {
+  incrementMessageCount,
+  topMessageCount,
+} from './commands/MessageCount/messageCountManager';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -45,27 +47,25 @@ client.once(Events.ClientReady, async () => {
   console.log('Discord watcher ready');
 });
 
-client.once(Events.ClientReady, () => {
-  setInterval(async () => {
-    const users = await prisma.user.findMany();
-    for (const user of users) {
-      const guild = client.guilds.cache.get('1046777564775067728');
-      if (!guild) continue;
+client.once(Events.MessageCreate, async () => {
+  const users = await prisma.user.findMany();
+  for (const user of users) {
+    const guild = client.guilds.cache.get('1046777564775067728');
+    if (!guild) continue;
 
-      const member = guild.members.cache.get(user.userId);
-      if (!member) continue;
+    const member = guild.members.cache.get(user.userId);
+    if (!member) continue;
 
-      const avatarUrl = member.user.avatarURL();
-      if (!avatarUrl) continue;
+    const avatarUrl = member.user.avatarURL();
+    if (!avatarUrl) continue;
 
-      if (avatarUrl === user.avatar) {
-        continue;
-      }
-
-      await updateAvatar(user.userId, avatarUrl);
-      console.log('User avatar', user.name, 'has been updated', avatarUrl);
+    if (avatarUrl === user.avatar) {
+      continue;
     }
-  }, 30);
+
+    await updateAvatar(user.userId, avatarUrl);
+    console.log('User avatar', user.name, 'has been updated', avatarUrl);
+  }
 });
 
 client.on(Events.MessageCreate, async (message) => {

@@ -1,12 +1,8 @@
-import { Prisma, PrismaClient } from '@prisma/client';
-
-export const prisma = new PrismaClient({
-  log: ['error'],
-});
+import { prisma } from '../../index';
 
 export async function updateAvatar(userId: string, avatarUrl: string) {
   await prisma.user.update({
     where: { userId },
-    data: { avatar: avatarUrl } as Prisma.UserUpdateInput,
+    data: { avatar: avatarUrl },
   });
 }

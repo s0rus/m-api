@@ -13,7 +13,6 @@ export const messageCount = async (message: Message) => {
       fetchDayTotalCount(),
       getAverageMessageCount(),
     ]);
-    const userAvatarUrl = message.author.avatarURL();
 
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
@@ -64,13 +63,10 @@ export const individualMessageCount = async (message: Message) => {
       return;
     }
 
-    const avatarUrl = user.avatar;
-    const username = user.name;
-
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
       .setDescription('Dawidownia')
-      .setThumbnail(avatarUrl)
+      .setThumbnail(user.avatar)
       .addFields({
         name: '```Dzisiaj```',
         value: `📩 ${JSON.stringify(todayCount, null, 0)}`,
@@ -82,8 +78,8 @@ export const individualMessageCount = async (message: Message) => {
         inline: true,
       })
       .setFooter({
-        iconURL: avatarUrl ?? undefined,
-        text: `${username} | ${currentDate.toLocaleString()}`,
+        iconURL: user.avatar ?? undefined,
+        text: `${user.name} | ${currentDate.toLocaleString()}`,
       });
     message.channel.send({ embeds: [messageCountEmbed] });
   } catch (error) {
