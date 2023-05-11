@@ -116,3 +116,29 @@ export async function getMessageCountByUsername(username: string) {
     allTimeCount: userData.totalMessageCount,
   };
 }
+
+export async function getMessageCountByUserId(userId: string) {
+  const userData = await prisma.user.findFirst({
+    where: {
+      userId,
+    },
+    include: {
+      aggregations: true,
+    },
+  });
+
+  if (!userData) throw new Error('Nie znaleziono użytkownika.');
+
+  const todayCount = userData.aggregations.reduce((acc, curr) => {
+    if (curr.date === dayjs(new Date()).format('DD.MM.YYYY')) {
+      return acc + curr.dayCount;
+    }
+
+    return acc;
+  }, 0);
+
+  return {
+    todayCount,
+    allTimeCount: userData.totalMessageCount,
+  };
+}

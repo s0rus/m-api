@@ -19,10 +19,12 @@ model AggregatedData {
 model User {
   id                String               @id @default(cuid())
   userId            String               @unique
+  avatar            String               @default("") 
   name              String
   aggregations      MessageAggregation[]
   totalMessageCount Int                  @default(0)
 }
+
 
 model MessageAggregation {
   id       String @id @default(cuid())

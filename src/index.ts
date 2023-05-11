@@ -10,16 +10,18 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { COMMANDS, buildCommand } from './commandHelpers';
 import { aha } from './commands/Aha/aha';
 import { ahaList } from './commands/Aha/ahaList';
 import { ahaRandom } from './commands/Aha/ahaRandom';
 import {
-  individialMessageCount,
+  individualMessageCount,
   messageCount,
 } from './commands/MessageCount/messageCount';
+import { updateAvatar } from './commands/MessageCount/avatarUpdate';
 import { incrementMessageCount } from './commands/MessageCount/messageCountManager';
+import { topMessageCount } from './commands/MessageCount/topMessageCount';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -43,6 +45,29 @@ client.once(Events.ClientReady, async () => {
   console.log('Discord watcher ready');
 });
 
+client.once(Events.ClientReady, () => {
+  setInterval(async () => {
+    const users = await prisma.user.findMany();
+    for (const user of users) {
+      const guild = client.guilds.cache.get('1046777564775067728');
+      if (!guild) continue;
+
+      const member = guild.members.cache.get(user.userId);
+      if (!member) continue;
+
+      const avatarUrl = member.user.avatarURL();
+      if (!avatarUrl) continue;
+
+      if (avatarUrl === user.avatar) {
+        continue;
+      }
+
+      await updateAvatar(user.userId, avatarUrl);
+      console.log('User avatar', user.name, 'has been updated', avatarUrl);
+    }
+  }, 30);
+});
+
 client.on(Events.MessageCreate, async (message) => {
   try {
     await incrementMessageCount(message);
@@ -56,7 +81,10 @@ client.on(Events.MessageCreate, async (message) => {
       await messageCount(message);
       break;
     case buildCommand(COMMANDS.individualMessageCount, message):
-      await individialMessageCount(message);
+      await individualMessageCount(message);
+      break;
+    case buildCommand(COMMANDS.topMessageCount, message):
+      await topMessageCount(message);
       break;
     case buildCommand(COMMANDS.ahaRandom, message):
       await ahaRandom(message);
