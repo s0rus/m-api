@@ -47,9 +47,7 @@ client.once(Events.ClientReady, async () => {
 
 client.on(Events.MessageCreate, async (message) => {
   await handleAvatarUpdate(client, message);
-});
 
-client.on(Events.MessageCreate, async (message) => {
   try {
     await incrementMessageCount(message);
   } catch (error) {
