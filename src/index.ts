@@ -11,11 +11,15 @@ import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 
 import { PrismaClient } from '@prisma/client';
+import { COMMANDS, buildCommand } from './commandHelpers';
 import { aha } from './commands/Aha/aha';
 import { ahaList } from './commands/Aha/ahaList';
 import { ahaRandom } from './commands/Aha/ahaRandom';
-import { messageCount } from './commands/MessageCount/messageCount';
-import { COMMANDS, buildCommand } from './const';
+import {
+  individialMessageCount,
+  messageCount,
+} from './commands/MessageCount/messageCount';
+import { incrementMessageCount } from './commands/MessageCount/messageCountManager';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -41,34 +45,18 @@ client.once(Events.ClientReady, async () => {
 
 client.on(Events.MessageCreate, async (message) => {
   try {
-    console.log(`[${message.createdAt}] ${message.author.username}: ${message.content}`);
-    const update = await prisma.aggregatedData.updateMany({
-      data: {
-        count: {
-          increment: 1,
-        },
-      },
-      where: {
-        date: dayjs(new Date()).format('MM.DD.YYYY'),
-      },
-    });
-
-    if (update.count === 0) {
-      console.log(`[${message.createdAt}] ${message.author.username}: ${message.content} - CREATED NEW DATE`);
-      await prisma.aggregatedData.create({
-        data: {
-          date: dayjs(new Date()).format('MM.DD.YYYY'),
-          count: 1,
-        },
-      });
-    }
+    await incrementMessageCount(message);
   } catch (error) {
     console.log(error);
+    message.channel.send('Wystąpił błąd podczas zapisywania wiadomości...');
   }
 
   switch (true) {
     case buildCommand(COMMANDS.messageCount, message):
       await messageCount(message);
+      break;
+    case buildCommand(COMMANDS.individualMessageCount, message):
+      await individialMessageCount(message);
       break;
     case buildCommand(COMMANDS.ahaRandom, message):
       await ahaRandom(message);
@@ -76,7 +64,7 @@ client.on(Events.MessageCreate, async (message) => {
     case buildCommand(COMMANDS.ahaList, message):
       await ahaList(message);
       break;
-    case buildCommand(COMMANDS.aha, message, /^aha[0-9]{1,}/):
+    case buildCommand(COMMANDS.aha, message):
       await aha(message);
       break;
     default:

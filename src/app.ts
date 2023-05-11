@@ -1,11 +1,10 @@
-import express from 'express';
-import morgan from 'morgan';
-import helmet from 'helmet';
 import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
-import * as middlewares from './middlewares';
 import api from './api';
-import countRouter from './api/messages/count';
+import * as middlewares from './middlewares';
 
 require('dotenv').config();
 
@@ -17,7 +16,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/v1', api);
-app.use('/api/v1/messages/count', countRouter);
 
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);

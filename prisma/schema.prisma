@@ -6,13 +6,28 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model AggregatedData {
   id    String @id @default(cuid())
   count Int    @default(0)
   date  String
+}
+
+model User {
+  id                String               @id @default(cuid())
+  userId            String               @unique
+  name              String
+  aggregations      MessageAggregation[]
+  totalMessageCount Int                  @default(0)
+}
+
+model MessageAggregation {
+  id       String @id @default(cuid())
+  dayCount Int    @default(0)
+  date     String
+  user     User   @relation(fields: [userId], references: [userId])
+  userId   String
 }
