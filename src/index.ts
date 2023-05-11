@@ -2,24 +2,26 @@ import app from './app';
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
-  /* eslint-disable no-console */
   console.log(`Listening: http://localhost:${port}`);
 });
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-
 import { PrismaClient } from '@prisma/client';
-import { COMMANDS, buildCommand } from './commandHelpers';
+import { COMMANDS, buildCommand } from './helpers/commandHelpers';
 import { aha } from './commands/Aha/aha';
 import { ahaList } from './commands/Aha/ahaList';
 import { ahaRandom } from './commands/Aha/ahaRandom';
 import {
-  individialMessageCount,
+  individualMessageCount,
   messageCount,
 } from './commands/MessageCount/messageCount';
-import { incrementMessageCount } from './commands/MessageCount/messageCountManager';
+import {
+  incrementMessageCount,
+  topMessageCount,
+} from './commands/MessageCount/messageCountManager';
+import handleAvatarUpdate from './helpers/avatarUpdate';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -46,6 +48,7 @@ client.once(Events.ClientReady, async () => {
 client.on(Events.MessageCreate, async (message) => {
   try {
     await incrementMessageCount(message);
+    await handleAvatarUpdate(client, message);
   } catch (error) {
     console.log(error);
     message.channel.send('Wystąpił błąd podczas zapisywania wiadomości...');
@@ -56,7 +59,10 @@ client.on(Events.MessageCreate, async (message) => {
       await messageCount(message);
       break;
     case buildCommand(COMMANDS.individualMessageCount, message):
-      await individialMessageCount(message);
+      await individualMessageCount(message);
+      break;
+    case buildCommand(COMMANDS.topMessageCount, message):
+      await topMessageCount(message);
       break;
     case buildCommand(COMMANDS.ahaRandom, message):
       await ahaRandom(message);

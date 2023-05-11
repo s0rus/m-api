@@ -8,6 +8,7 @@ export const COMMANDS = {
   aha: /^aha[0-9]{1,}/,
   ahaRandom: '!aharandom',
   ahaList: '!ahalista',
+  topMessageCount: '!topw',
 } as const;
 
 export type Command = (typeof COMMANDS)[keyof typeof COMMANDS];

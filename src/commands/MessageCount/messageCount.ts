@@ -1,10 +1,11 @@
 import { EmbedBuilder, Message } from 'discord.js';
-import { COMMANDS } from '../../commandHelpers';
+import { COMMANDS } from '../../helpers/commandHelpers';
 import {
   fetchDayTotalCount,
   getAverageMessageCount,
-  getMessageCountByUsername,
+  getMessageCountByUserId,
 } from './messageCountManager';
+import { prisma } from '../../index';
 
 export const messageCount = async (message: Message) => {
   try {
@@ -19,9 +20,10 @@ export const messageCount = async (message: Message) => {
       .setThumbnail(
         'https://cdn.discordapp.com/emojis/1047234305191063702.webp?size=96&quality=lossless',
       )
+
       .addFields({
-        name: '```Wiadomości dzisiaj```',
-        value: `${JSON.stringify(todayCount, null, 0)}`,
+        name: '```Dzisiaj```',
+        value: `📩 ${JSON.stringify(todayCount, null, 0)}`,
         inline: true,
       })
       .setFooter({
@@ -41,37 +43,44 @@ export const messageCount = async (message: Message) => {
   }
 };
 
-export const individialMessageCount = async (message: Message) => {
+export const individualMessageCount = async (message: Message) => {
   const match = message.content.match(COMMANDS.individualMessageCount);
 
   if (!match) return;
 
-  const username = match[1];
-
-  console.log(username);
+  const userMention = match[1];
+  const userId = userMention.replace(/[<@!>]/g, '');
 
   try {
-    const { todayCount, allTimeCount } = await getMessageCountByUsername(
-      username,
-    );
+    const { todayCount, allTimeCount } = await getMessageCountByUserId(userId);
+    const currentDate = new Date();
+
+    const user = await prisma.user.findFirst({
+      where: { userId },
+    });
+
+    if (!user) {
+      return;
+    }
 
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
-      .setDescription(username)
-      .setThumbnail(
-        'https://cdn.discordapp.com/emojis/1047234305191063702.webp?size=96&quality=lossless',
-      )
+      .setDescription('Dawidownia')
+      .setThumbnail(user.avatar)
       .addFields({
-        name: '```Wiadomości dzisiaj```',
-        value: `${JSON.stringify(todayCount, null, 0)}`,
+        name: '```Dzisiaj```',
+        value: `📩 ${JSON.stringify(todayCount, null, 0)}`,
         inline: true,
       })
       .addFields({
-        name: '```Wiadomości ogółem```',
-        value: `${JSON.stringify(allTimeCount, null, 0)}`,
+        name: '```Wszystkie```',
+        value: `✉️ ${JSON.stringify(allTimeCount, null, 0)}`,
         inline: true,
+      })
+      .setFooter({
+        iconURL: user.avatar ?? undefined,
+        text: `${user.name} | ${currentDate.toLocaleString()}`,
       });
-
     message.channel.send({ embeds: [messageCountEmbed] });
   } catch (error) {
     const err = error as Error;
