@@ -164,19 +164,19 @@ export const topMessageCount = async (message: Message) => {
     return;
   }
 
-  const sortedUsers = users.sort((a, b) => {
-    const sumA = a.aggregations.reduce(
-      (sum, aggregation) => sum + aggregation.dayCount,
-      0,
-    );
-    const sumB = b.aggregations.reduce(
-      (sum, aggregation) => sum + aggregation.dayCount,
-      0,
-    );
-    return sumB - sumA;
-  });
-
-  const topUsers = sortedUsers.slice(0, 3);
+  const topUsers = users
+    .sort((a, b) => {
+      const sumA = a.aggregations.reduce(
+        (sum, aggregation) => sum + aggregation.dayCount,
+        0,
+      );
+      const sumB = b.aggregations.reduce(
+        (sum, aggregation) => sum + aggregation.dayCount,
+        0,
+      );
+      return sumB - sumA;
+    })
+    .slice(0, 3);
 
   const fields = topUsers.map((user, index) => {
     const sumDayCount = user.aggregations.reduce(

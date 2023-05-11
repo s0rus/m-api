@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { COMMANDS, buildCommand } from './commandHelpers';
 import { aha } from './commands/Aha/aha';
 import { ahaList } from './commands/Aha/ahaList';
@@ -19,7 +19,6 @@ import {
   individualMessageCount,
   messageCount,
 } from './commands/MessageCount/messageCount';
-import { updateAvatar } from './commands/MessageCount/avatarUpdate';
 import {
   incrementMessageCount,
   topMessageCount,
@@ -47,24 +46,32 @@ client.once(Events.ClientReady, async () => {
   console.log('Discord watcher ready');
 });
 
-client.once(Events.MessageCreate, async () => {
-  const users = await prisma.user.findMany();
-  for (const user of users) {
-    const guild = client.guilds.cache.get('1046777564775067728');
-    if (!guild) continue;
+client.on(Events.MessageCreate, async (message) => {
+  const guild = client.guilds.cache.get('1046777564775067728');
+  if (!guild) return;
 
-    const member = guild.members.cache.get(user.userId);
-    if (!member) continue;
+  const user = message.author;
+  const member = guild.members.cache.get(user.id);
+  if (!member) return;
 
-    const avatarUrl = member.user.avatarURL();
-    if (!avatarUrl) continue;
+  const avatarUrl = user.avatarURL();
+  if (!avatarUrl) return;
 
-    if (avatarUrl === user.avatar) {
-      continue;
-    }
+  const dbUser = await prisma.user.findUnique({
+    where: { userId: user.id },
+  });
 
-    await updateAvatar(user.userId, avatarUrl);
-    console.log('User avatar', user.name, 'has been updated', avatarUrl);
+  if (!dbUser) return;
+
+  if (dbUser.avatar !== avatarUrl) {
+    await prisma.user.update({
+      where: { userId: user.id },
+      data: {
+        avatar: avatarUrl,
+      },
+    });
+
+    console.log(dbUser.name, 'avatar has been updated');
   }
 });
 
