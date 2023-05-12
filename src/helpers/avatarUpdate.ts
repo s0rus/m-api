@@ -1,11 +1,12 @@
 import { Client, Message } from 'discord.js';
+import { discordIds } from 'src/constants/discordIds';
 import { prisma } from '../index';
 
 export default async function handleAvatarUpdate(
   client: Client,
   message: Message,
 ) {
-  const guild = client.guilds.cache.get('1046777564775067728');
+  const guild = client.guilds.cache.get(discordIds.GUILD_ID);
   if (!guild) return;
 
   const user = message.author;

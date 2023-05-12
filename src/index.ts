@@ -5,11 +5,10 @@ app.listen(port, () => {
   console.log(`Listening: http://localhost:${port}`);
 });
 
+import { PrismaClient } from '@prisma/client';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { PrismaClient } from '@prisma/client';
-import { COMMANDS, buildCommand } from './helpers/commandHelpers';
 import { aha } from './commands/Aha/aha';
 import { ahaList } from './commands/Aha/ahaList';
 import { ahaRandom } from './commands/Aha/ahaRandom';
@@ -22,6 +21,8 @@ import {
   topMessageCount,
 } from './commands/MessageCount/messageCountManager';
 import handleAvatarUpdate from './helpers/avatarUpdate';
+import { COMMANDS, buildCommand } from './helpers/commandHelpers';
+import { pingInstantBattle } from './helpers/pingInstantBattle';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -43,6 +44,7 @@ const client = new Client({
 
 client.once(Events.ClientReady, async () => {
   console.log('Discord watcher ready');
+  pingInstantBattle(client);
 });
 
 client.on(Events.MessageCreate, async (message) => {
