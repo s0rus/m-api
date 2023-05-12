@@ -1,13 +1,13 @@
-import express from 'express';
+// import express from 'express';
 
-import MessageResponse from '../interfaces/MessageResponse';
+// import MessageResponse from '../interfaces/MessageResponse';
 
-const router = express.Router();
+// const router = express.Router();
 
-router.get<{}, MessageResponse>('/', (req, res) => {
-  res.json({
-    message: 'API - 👋🌎🌍🌏',
-  });
-});
+// router.get<{}, MessageResponse>('/', (req, res) => {
+//   res.json({
+//     message: 'API - 👋🌎🌍🌏',
+//   });
+// });
 
-export default router;
+// export default router;

@@ -1,5 +1,5 @@
 import { Client, Message } from 'discord.js';
-import { discordIds } from 'src/constants/discordIds';
+import { discordIds } from '../constants/discordIds';
 import { prisma } from '../index';
 
 export default async function handleAvatarUpdate(
