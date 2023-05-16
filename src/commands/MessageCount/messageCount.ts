@@ -1,11 +1,10 @@
 import { EmbedBuilder, Message } from 'discord.js';
-import { COMMANDS } from '../../helpers/commandHelpers';
+import { prisma } from '../../index';
 import {
   fetchDayTotalCount,
   getAverageMessageCount,
   getMessageCountByUserId,
 } from './messageCountManager';
-import { prisma } from '../../index';
 
 export const messageCount = async (message: Message) => {
   try {
@@ -27,11 +26,7 @@ export const messageCount = async (message: Message) => {
         inline: true,
       })
       .setFooter({
-        text: `Średnia: ${JSON.stringify(
-          parseFloat(avgCount.toFixed(2)),
-          null,
-          0,
-        )}`,
+        text: `Średnia: ${avgCount ? Math.floor(avgCount) : '--'}`,
         iconURL:
           'https://cdn.discordapp.com/emojis/1047234305191063702.webp?size=96&quality=lossless',
       });
@@ -43,12 +38,10 @@ export const messageCount = async (message: Message) => {
   }
 };
 
-export const individualMessageCount = async (message: Message) => {
-  const match = message.content.match(COMMANDS.individualMessageCount);
-
-  if (!match) return;
-
-  const userMention = match[1];
+export const individualMessageCount = async (
+  message: Message,
+  userMention: string,
+) => {
   const userId = userMention.replace(/[<@!>]/g, '');
 
   try {
