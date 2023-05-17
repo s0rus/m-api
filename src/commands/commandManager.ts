@@ -3,7 +3,7 @@ import {
   individualMessageCount,
   messageCount,
 } from './MessageCount/messageCount';
-
+import { ahaAdd, ahaRemove, ahaList, ahaRandom } from './Aha/ahaGifsManager';
 export const COMMAND_PREFIX = '!' as const;
 
 export type Command = {
@@ -28,6 +28,42 @@ const commands: { [key: string]: Command } = {
         default:
           break;
       }
+    },
+  },
+  aha: {
+    minArgs: 0,
+    handler: async (message, args) => {
+      const subCommand = args[0];
+      switch (subCommand) {
+        case 'remove':
+          await ahaRemove(message, args.slice(1));
+          break;
+        case 'add':
+          await ahaAdd(message, args.slice(1));
+          break;
+        case 'list':
+          await ahaList(message);
+          break;
+        case 'random':
+          await ahaRandom(message);
+          break;
+        default:
+          console.log('Nieprawidłowe polecenie `aha`');
+          break;
+      }
+    },
+  },
+  komendy: {
+    handler: async (message) => {
+      const commandList = [
+        '!aha remove `[numer]` ---- usuwa aha o określonym numerze z bazy danych',
+        '!aha add `[numer]` `[url]` ---- dodaje aha o określonym numerze i gifie z discorda do bazy danych',
+        '!aha list ---- pokazuje wszystkie aha',
+        '!aha random ---- randomowe aha',
+        '!w / `[@mention]` ---- pokazuje ilość wiadomości ogólna / wskazanego użytkownika',
+      ].join('\n');
+
+      message.reply(`Oto dostępne komendy:\n${commandList}`);
     },
   },
 };

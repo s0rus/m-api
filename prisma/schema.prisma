@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider             = "mysql"
+  provider             = "sqlite"
   url                  = env("DATABASE_URL")
   referentialIntegrity = "prisma"
 }
@@ -32,4 +32,9 @@ model MessageAggregation {
   date     String
   user     User   @relation(fields: [userId], references: [userId])
   userId   String
+}
+
+model AhaGifs {
+  id String @id
+  url   String
 }
