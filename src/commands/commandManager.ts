@@ -13,16 +13,23 @@ export type Command = {
   handler: (message: Message, args: string[]) => void;
 };
 
+/*
+  ! If you are adding a command that can either take arguments or not,
+  ! you have to start taking the arguments from index 1, not 0 because
+  ! the argument at index 0 is the dynamic value - this however you can
+  ! utilize when you want to create a dynamic command like aha42 or aha69
+*/
+
 const commands: { [key: string]: Command } = {
   w: {
     prefixRequired: true,
     maxArgs: 1,
     handler: async (message, args) => {
       switch (args.length) {
-        case 0:
+        case 1:
           await messageCount(message);
           break;
-        case 1:
+        case 2:
           await individualMessageCount(message, args[0]);
           break;
         default:
