@@ -111,16 +111,16 @@ export const listAha = async (message: Message) => {
 };
 
 export const getAha = async (message: Message, ahaNumber: number) => {
-  if (
-    !ahaNumber ||
-    z.number().int().positive().safeParse(ahaNumber).success === false
-  ) {
-    throw new Error(
-      `Podaj poprawny argument: \`numer\` do wyświetlenia aha ${discordEmotes.OSTATNIA_SZANSA}`,
-    );
-  }
-
   try {
+    if (
+      !ahaNumber ||
+      z.number().int().positive().safeParse(ahaNumber).success === false
+    ) {
+      throw new Error(
+        `Podaj poprawny argument: \`numer\` do wyświetlenia aha ${discordEmotes.OSTATNIA_SZANSA}`,
+      );
+    }
+
     const ahaGif = await prisma.ahaGifs.findFirst({
       where: {
         id: ahaNumber,
