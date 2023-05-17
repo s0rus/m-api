@@ -1,6 +1,19 @@
-export const discordIds = {
+export const channelIds = {
   GUILD_ID: '1046777564775067728',
   MAIN_CHANNEL_ID: '1048729482627907624',
+} as const;
+
+export const discordRoles = {
   NOSTALE_ROLE: '1105114171504328806',
   ADMIN_ROLE: '1049323068104921098',
 } as const;
+
+export const discordEmotes = {
+  OSTRZEZENIE: '<:ostrzezenie:1108028955220512838>',
+  SMIESZEK: '<:Smieszek:1050427251394625586>',
+  OSTATNIA_SZANSA: '<:ostatniaszansa:1078048819075354715>',
+} as const;
+
+export type DiscordId = (typeof channelIds)[keyof typeof channelIds];
+export type DiscordRole = (typeof discordRoles)[keyof typeof discordRoles];
+export type DiscordEmote = (typeof discordEmotes)[keyof typeof discordEmotes];

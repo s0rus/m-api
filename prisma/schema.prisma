@@ -35,6 +35,6 @@ model MessageAggregation {
 }
 
 model AhaGifs {
-  id String @id
-  url   String
+  id  Int    @id @unique
+  url String
 }

@@ -51,7 +51,7 @@ export async function incrementMessageCount(message: Message) {
 
   await prisma.user.upsert({
     where: {
-      userId: message.author.id,
+      userId: message?.author?.id ?? '',
     },
     update: {
       totalMessageCount: {

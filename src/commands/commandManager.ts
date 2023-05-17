@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
+import { addAha, getAha, getRandomAha, listAha, removeAha } from './Aha/aha';
 import {
   individualMessageCount,
   messageCount,
 } from './MessageCount/messageCount';
-import { ahaAdd, ahaRemove, ahaList, ahaRandom } from './Aha/ahaGifsManager';
 export const COMMAND_PREFIX = '!' as const;
 
 export type Command = {
@@ -31,29 +31,38 @@ const commands: { [key: string]: Command } = {
     },
   },
   aha: {
-    minArgs: 0,
     handler: async (message, args) => {
-      const subCommand = args[0];
+      const dynamicArg = args[0];
+
+      if (args[0]) {
+        await getAha(message, parseInt(dynamicArg));
+        return;
+      }
+
+      const subCommand = args[1] as 'add' | 'remove' | 'list' | 'random';
       switch (subCommand) {
-        case 'remove':
-          await ahaRemove(message, args.slice(1));
-          break;
         case 'add':
-          await ahaAdd(message, args.slice(1));
+          await addAha(message, {
+            ahaNumber: parseInt(args[2]),
+            ahaUrl: args[3],
+          });
+          break;
+        case 'remove':
+          await removeAha(message, parseInt(args[2]));
           break;
         case 'list':
-          await ahaList(message);
+          await listAha(message);
           break;
         case 'random':
-          await ahaRandom(message);
+          await getRandomAha(message);
           break;
         default:
-          console.log('Nieprawidłowe polecenie `aha`');
           break;
       }
     },
   },
   komendy: {
+    prefixRequired: true,
     handler: async (message) => {
       const commandList = [
         '!aha remove `[numer]` ---- usuwa aha o określonym numerze z bazy danych',
@@ -69,18 +78,21 @@ const commands: { [key: string]: Command } = {
 };
 
 const isValidCommand = (input: string) => {
-  const prefixedRegex = new RegExp(`^(${COMMAND_PREFIX})?([a-z]+)(\\s.*)?$`);
-  const unprefixedRegex = new RegExp('^([a-z]+)(\\s.*)?$');
+  const prefixedRegex = new RegExp(
+    `^(${COMMAND_PREFIX})?([a-z]+)(\\d+)?(\\s.*)?$`,
+    'i',
+  );
+  const unprefixedRegex = new RegExp('^([a-z]+)(\\d+)?(\\s.*)?$', 'i');
 
   if (prefixedRegex.test(input)) {
-    const commandName = input.replace(COMMAND_PREFIX, '').split(/\s+/)[0];
+    const commandName = input.replace(COMMAND_PREFIX, '').match(/^[a-z]+/i)![0];
     return (
       commands.hasOwnProperty(commandName) &&
       (!commands[commandName].prefixRequired ||
         input.startsWith(COMMAND_PREFIX))
     );
   } else if (unprefixedRegex.test(input)) {
-    const commandName = input.split(/\s+/)[0];
+    const commandName = input.match(/^[a-z]+/i)![0];
     return commands.hasOwnProperty(commandName);
   }
   return false;
@@ -93,10 +105,14 @@ export const handleCommand = (message: Message) => {
     return;
   }
 
-  const commandRegex = new RegExp(`^(${COMMAND_PREFIX})?([a-z]+)(.*)?$`);
+  const commandRegex = new RegExp(
+    `^(${COMMAND_PREFIX})?([a-z]+)(\\d+)?(.*)?$`,
+    'i',
+  );
   const match = input.match(commandRegex)!;
   const commandName = match[2];
-  const argsString = match[3] || '';
+  const dynamicNumber = match[3] || '';
+  const argsString = match[4] || '';
   const args = argsString
     .trim()
     .split(/\s+/)
@@ -110,5 +126,5 @@ export const handleCommand = (message: Message) => {
   ) {
     return;
   }
-  command.handler(message, args);
+  command.handler(message, [dynamicNumber, ...args]);
 };
