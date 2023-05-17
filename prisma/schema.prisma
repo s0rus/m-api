@@ -33,3 +33,8 @@ model MessageAggregation {
   user     User   @relation(fields: [userId], references: [userId])
   userId   String
 }
+
+model AhaGifs {
+  id  Int    @id @unique
+  url String
+}

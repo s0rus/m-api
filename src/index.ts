@@ -9,20 +9,9 @@ import { PrismaClient } from '@prisma/client';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { aha } from './commands/Aha/aha';
-import { ahaList } from './commands/Aha/ahaList';
-import { ahaRandom } from './commands/Aha/ahaRandom';
-import {
-  individualMessageCount,
-  messageCount,
-} from './commands/MessageCount/messageCount';
-import {
-  incrementMessageCount,
-  topMessageCount,
-} from './commands/MessageCount/messageCountManager';
+import { incrementMessageCount } from './commands/MessageCount/messageCountManager';
+import { handleCommand } from './commands/commandManager';
 import handleAvatarUpdate from './helpers/avatarUpdate';
-import { COMMANDS, buildCommand } from './helpers/commandHelpers';
-import { pingInstantBattle } from './helpers/pingInstantBattle';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -44,39 +33,19 @@ const client = new Client({
 
 client.once(Events.ClientReady, async () => {
   console.log('Discord watcher ready');
-  pingInstantBattle(client);
+  // pingInstantBattle(client);
 });
 
 client.on(Events.MessageCreate, async (message) => {
   try {
-    await incrementMessageCount(message);
-    await handleAvatarUpdate(client, message);
+    await Promise.all([
+      incrementMessageCount(message),
+      handleAvatarUpdate(client, message),
+    ]);
+    handleCommand(message);
   } catch (error) {
     console.log(error);
-    message.channel.send('Wystąpił błąd podczas zapisywania wiadomości...');
-  }
-
-  switch (true) {
-    case buildCommand(COMMANDS.messageCount, message):
-      await messageCount(message);
-      break;
-    case buildCommand(COMMANDS.individualMessageCount, message):
-      await individualMessageCount(message);
-      break;
-    case buildCommand(COMMANDS.topMessageCount, message):
-      await topMessageCount(message);
-      break;
-    case buildCommand(COMMANDS.ahaRandom, message):
-      await ahaRandom(message);
-      break;
-    case buildCommand(COMMANDS.ahaList, message):
-      await ahaList(message);
-      break;
-    case buildCommand(COMMANDS.aha, message):
-      await aha(message);
-      break;
-    default:
-      break;
+    // message.channel.send('Wystąpił błąd podczas zapisywania wiadomości...');
   }
 });
 

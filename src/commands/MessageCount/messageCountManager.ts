@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
+import { Message } from 'discord.js';
 import { prisma } from '../../index';
-import { COMMANDS } from '../../helpers/commandHelpers';
-import { EmbedBuilder, Message } from 'discord.js';
 
 export async function fetchDayTotalCount() {
   const todayRecords = await prisma.messageAggregation.findMany({
@@ -33,7 +32,7 @@ export async function getAverageMessageCount() {
     return acc;
   }, [] as string[]);
 
-  return countWithoutToday / uniqueDays.length;
+  return countWithoutToday / uniqueDays.length ?? 0;
 }
 
 export async function incrementMessageCount(message: Message) {
@@ -52,7 +51,7 @@ export async function incrementMessageCount(message: Message) {
 
   await prisma.user.upsert({
     where: {
-      userId: message.author.id,
+      userId: message?.author?.id ?? '',
     },
     update: {
       totalMessageCount: {
@@ -144,55 +143,56 @@ export async function getMessageCountByUserId(userId: string) {
   };
 }
 
-export const topMessageCount = async (message: Message) => {
-  const match = message.content.match(COMMANDS.topMessageCount);
+// TODO: Fix the implementation of this command
+// export const topMessageCount = async (message: Message) => {
+//   const match = message.content.match(COMMANDS.topMessageCount);
 
-  if (!match) return;
+//   if (!match) return;
 
-  const users = await prisma.user.findMany({
-    include: {
-      aggregations: {
-        select: {
-          dayCount: true,
-        },
-      },
-    },
-  });
+//   const users = await prisma.user.findMany({
+//     include: {
+//       aggregations: {
+//         select: {
+//           dayCount: true,
+//         },
+//       },
+//     },
+//   });
 
-  if (users.length === 0) {
-    message.channel.send('Nie znaleziono użytkowników.');
-    return;
-  }
+//   if (users.length === 0) {
+//     message.channel.send('Nie znaleziono użytkowników.');
+//     return;
+//   }
 
-  const topUsers = users
-    .sort((a, b) => {
-      const sumA = a.aggregations.reduce(
-        (sum, aggregation) => sum + aggregation.dayCount,
-        0,
-      );
-      const sumB = b.aggregations.reduce(
-        (sum, aggregation) => sum + aggregation.dayCount,
-        0,
-      );
-      return sumB - sumA;
-    })
-    .slice(0, 3);
+//   const topUsers = users
+//     .sort((a, b) => {
+//       const sumA = a.aggregations.reduce(
+//         (sum, aggregation) => sum + aggregation.dayCount,
+//         0,
+//       );
+//       const sumB = b.aggregations.reduce(
+//         (sum, aggregation) => sum + aggregation.dayCount,
+//         0,
+//       );
+//       return sumB - sumA;
+//     })
+//     .slice(0, 3);
 
-  const fields = topUsers.map((user, index) => {
-    const sumDayCount = user.aggregations.reduce(
-      (sum, aggregation) => sum + aggregation.dayCount,
-      0,
-    );
-    return {
-      name: `Miejsce ${index + 1}`,
-      value: `Użytkownik: ${user.name}\nLiczba wiadomości: ${sumDayCount}`,
-      inline: false,
-    };
-  });
-  const messageCountEmbed = new EmbedBuilder()
-    .setColor('#6c42f5')
-    .setTitle('Najaktywniejsi użytkownicy')
-    .addFields(fields);
+//   const fields = topUsers.map((user, index) => {
+//     const sumDayCount = user.aggregations.reduce(
+//       (sum, aggregation) => sum + aggregation.dayCount,
+//       0,
+//     );
+//     return {
+//       name: `Miejsce ${index + 1}`,
+//       value: `Użytkownik: ${user.name}\nLiczba wiadomości: ${sumDayCount}`,
+//       inline: false,
+//     };
+//   });
+//   const messageCountEmbed = new EmbedBuilder()
+//     .setColor('#6c42f5')
+//     .setTitle('Najaktywniejsi użytkownicy')
+//     .addFields(fields);
 
-  message.channel.send({ embeds: [messageCountEmbed] });
-};
+//   message.channel.send({ embeds: [messageCountEmbed] });
+// };
