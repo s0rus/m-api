@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { addAha, getAha, getRandomAha, listAha, removeAha } from './Aha/aha';
 import {
-  individualMessageCount,
+  // individualMessageCount,
   messageCount,
 } from './MessageCount/messageCount';
 export const COMMAND_PREFIX = '!' as const;
@@ -29,8 +29,8 @@ const commands: { [key: string]: Command } = {
         case 1:
           await messageCount(message);
           break;
-        case 2:
-          await individualMessageCount(message, args[0]);
+          // case 2:
+          //   await individualMessageCount(message, args[0].substring(2));
           break;
         default:
           break;
@@ -72,11 +72,11 @@ const commands: { [key: string]: Command } = {
     prefixRequired: true,
     handler: async (message) => {
       const commandList = [
-        '!aha remove `[numer]` ---- usuwa aha o określonym numerze z bazy danych',
-        '!aha add `[numer]` `[url]` ---- dodaje aha o określonym numerze i gifie z discorda do bazy danych',
-        '!aha list ---- pokazuje wszystkie aha',
-        '!aha random ---- randomowe aha',
-        '!w / `[@mention]` ---- pokazuje ilość wiadomości ogólna / wskazanego użytkownika',
+        '## !<:aha:1047239820528853042> remove `[numer]` ---- usuwa aha o określonym numerze z bazy danych',
+        '## !<:aha:1047239820528853042> add `[numer]` `[url]` ---- dodaje aha o określonym numerze i gifie z discorda do bazy danych',
+        '## !<:aha:1047239820528853042> list ---- pokazuje wszystkie aha',
+        '## !<:aha:1047239820528853042> random ---- randomowe aha',
+        '## !w ---- pokazuje ilość wiadomości',
       ].join('\n');
 
       message.reply(`Oto dostępne komendy:\n${commandList}`);

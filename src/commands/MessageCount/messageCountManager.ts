@@ -91,108 +91,29 @@ export async function incrementMessageCount(message: Message) {
   });
 }
 
-export async function getMessageCountByUsername(username: string) {
-  const userData = await prisma.user.findFirst({
-    where: {
-      name: username,
-    },
-    include: {
-      aggregations: true,
-    },
-  });
-
-  if (!userData) throw new Error('Nie znaleziono użytkownika.');
-
-  const todayCount = userData.aggregations.reduce((acc, curr) => {
-    if (curr.date === dayjs(new Date()).format('DD.MM.YYYY')) {
-      return acc + curr.dayCount;
-    }
-
-    return acc;
-  }, 0);
-
-  return {
-    todayCount,
-    allTimeCount: userData.totalMessageCount,
-  };
-}
-
-export async function getMessageCountByUserId(userId: string) {
-  const userData = await prisma.user.findFirst({
-    where: {
-      userId,
-    },
-    include: {
-      aggregations: true,
-    },
-  });
-
-  if (!userData) throw new Error('Nie znaleziono użytkownika.');
-
-  const todayCount = userData.aggregations.reduce((acc, curr) => {
-    if (curr.date === dayjs(new Date()).format('DD.MM.YYYY')) {
-      return acc + curr.dayCount;
-    }
-
-    return acc;
-  }, 0);
-
-  return {
-    todayCount,
-    allTimeCount: userData.totalMessageCount,
-  };
-}
-
-// TODO: Fix the implementation of this command
-// export const topMessageCount = async (message: Message) => {
-//   const match = message.content.match(COMMANDS.topMessageCount);
-
-//   if (!match) return;
-
-//   const users = await prisma.user.findMany({
+// export async function getMessageCountByUserId(userId: string) {
+//   const userData = await prisma.user.findFirst({
+//     where: {
+//       userId: userId,
+//     },
 //     include: {
-//       aggregations: {
-//         select: {
-//           dayCount: true,
-//         },
-//       },
+//       aggregations: true,
 //     },
 //   });
 
-//   if (users.length === 0) {
-//     message.channel.send('Nie znaleziono użytkowników.');
-//     return;
-//   }
+//   if (!userData)
+//     throw new Error('Nie znaleziono użytkownika [getMessageCountByUserId].');
 
-//   const topUsers = users
-//     .sort((a, b) => {
-//       const sumA = a.aggregations.reduce(
-//         (sum, aggregation) => sum + aggregation.dayCount,
-//         0,
-//       );
-//       const sumB = b.aggregations.reduce(
-//         (sum, aggregation) => sum + aggregation.dayCount,
-//         0,
-//       );
-//       return sumB - sumA;
-//     })
-//     .slice(0, 3);
+//   const todayCount = userData.aggregations.reduce((acc, curr) => {
+//     if (curr.date === dayjs(new Date()).format('DD.MM.YYYY')) {
+//       return acc + curr.dayCount;
+//     }
 
-//   const fields = topUsers.map((user, index) => {
-//     const sumDayCount = user.aggregations.reduce(
-//       (sum, aggregation) => sum + aggregation.dayCount,
-//       0,
-//     );
-//     return {
-//       name: `Miejsce ${index + 1}`,
-//       value: `Użytkownik: ${user.name}\nLiczba wiadomości: ${sumDayCount}`,
-//       inline: false,
-//     };
-//   });
-//   const messageCountEmbed = new EmbedBuilder()
-//     .setColor('#6c42f5')
-//     .setTitle('Najaktywniejsi użytkownicy')
-//     .addFields(fields);
+//     return acc;
+//   }, 0);
 
-//   message.channel.send({ embeds: [messageCountEmbed] });
-// };
+//   return {
+//     todayCount,
+//     allTimeCount: userData.totalMessageCount,
+//   };
+// }
