@@ -7,6 +7,16 @@ import {
 import { embedFallback } from '../../helpers/embedFallback';
 import { discordEmotes } from '../../constants/discordIds';
 
+const getStatus = (todayCount: number) => {
+  if (todayCount < 500) {
+    return `Umieralnia 💀`;
+  } else if (todayCount >= 500 && todayCount < 2000) {
+    return 'Hujowo ale stabilnie ☝🏿';
+  } else if (todayCount >= 2000) {
+    return 'Norma wyrobiona 😮';
+  }
+};
+
 export const messageCount = async (message: Message) => {
   const guildName = message.guild
     ? message.guild.name
@@ -15,26 +25,10 @@ export const messageCount = async (message: Message) => {
     ? message.guild.iconURL()
     : embedFallback.AVATAR_FALLBACK;
 
-  const getStatus = {
-    1: `${guildName} Umieralnia 💀`,
-    2: 'Hujowo ale stabilnie ☝🏿',
-    3: 'Norma wyrobiona 😮',
-  };
-
   try {
     const todayCount = await fetchDayTotalCount();
     const avgCount = await getAverageMessageCount();
-    const status = getStatusFunction(todayCount);
-
-    function getStatusFunction(todayCount: number) {
-      if (todayCount < 500) {
-        return getStatus[1];
-      } else if (todayCount >= 500 && todayCount < 2000) {
-        return getStatus[2];
-      } else if (todayCount >= 2000) {
-        return getStatus[3];
-      }
-    }
+    const status = getStatus(todayCount);
 
     const discordEmote =
       todayCount < 1000
