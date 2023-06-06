@@ -9,7 +9,7 @@ datasource db {
 }
 
 model AggregatedData {
-  id    String @id
+  id    String @id @default(cuid())
   count Int    @default(0)
   date  String
 }

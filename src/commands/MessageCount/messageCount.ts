@@ -72,21 +72,23 @@ export const individualMessageCount = async (message: Message) => {
   if (!userMention) {
     return;
   }
-
-  const userId = userMention;
   const user = message.mentions.users.first();
 
   try {
-    const { todayCount, allTimeCount } = await getMessageCountByUserId(userId);
+    const { todayCount, allTimeCount } = await getMessageCountByUserId(
+      userMention,
+    );
     const currentDate = new Date();
 
     if (!user) {
       return;
     }
-    const guildName = message.guild ? message.guild.name : 'Nazwa Serwera';
-    const avatarUrl = user.avatarURL();
-    const thumbnailUrl = avatarUrl ?? undefined;
-    const iconUrl = avatarUrl ?? null;
+    const guildName = message.guild
+      ? message.guild.name
+      : 'Server name not found';
+    const thumbnailUrl =
+      user.avatarURL() ?? 'https://cdn.discordapp.com/embed/avatars/4.png';
+    const iconUrl = user.avatarURL() ?? null;
     const todayEmote =
       todayCount < 200
         ? discordEmotes.JASPER_WEIRD
@@ -119,7 +121,7 @@ export const individualMessageCount = async (message: Message) => {
   } catch (error) {
     const err = error as Error;
     console.log(err);
-    console.log(userId);
+    console.log(userMention);
     message.channel.send(err.message);
   }
 };

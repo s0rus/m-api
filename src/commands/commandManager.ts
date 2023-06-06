@@ -1,6 +1,5 @@
 import { Message } from 'discord.js';
 import { addAha, getAha, getRandomAha, listAha, removeAha } from './Aha/aha';
-import { discordEmotes } from '../constants/discordIds';
 import {
   individualMessageCount,
   messageCount,
@@ -71,11 +70,11 @@ const commands: { [key: string]: Command } = {
     prefixRequired: true,
     handler: async (message) => {
       const commandList = [
-        `## !${discordEmotes.AHA} add \`[numer]\` \`[url.gif]\``,
-        `## !${discordEmotes.AHA} remove \`[numer]\``,
-        `## !${discordEmotes.AHA} list`,
-        `## !${discordEmotes.AHA} random`,
-        `## !w / <@1054784342251024425> ---- pokazuje ilość wiadomości ogólną / użytkownika`,
+        '## !aha add `[numer]` `[url.gif]`',
+        '## !aha remove `[numer]`',
+        '## !aha list',
+        '## !aha random',
+        '## !w / <@1054784342251024425> ---- pokazuje ilość wiadomości ogólną / użytkownika',
       ].join('\n');
 
       message.reply(`Oto dostępne komendy:\n${commandList}`);
