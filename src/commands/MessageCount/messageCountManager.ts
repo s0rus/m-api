@@ -94,7 +94,7 @@ export async function incrementMessageCount(message: Message) {
 export async function getMessageCountByUserId(userId: string) {
   const userData = await prisma.user.findFirst({
     where: {
-      userId: userId,
+      userId,
     },
     include: {
       aggregations: true,

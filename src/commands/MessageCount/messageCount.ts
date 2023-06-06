@@ -4,12 +4,16 @@ import {
   getAverageMessageCount,
   getMessageCountByUserId,
 } from './messageCountManager';
-
+import { embedFallback } from 'src/helpers/embedFallback';
 import { discordEmotes } from '../../constants/discordIds';
 
 export const messageCount = async (message: Message) => {
-  const guildName = message.guild ? message.guild.name : 'Nazwa Serwera';
-  const guildIcon = message.guild ? message.guild.iconURL() : '';
+  const guildName = message.guild
+    ? message.guild.name
+    : embedFallback.SERVER_NAME_FALLBACK;
+  const guildIcon = message.guild
+    ? message.guild.iconURL()
+    : embedFallback.AVATAR_FALLBACK;
 
   const getStatus = {
     1: `${guildName} Umieralnia 💀`,
@@ -54,8 +58,8 @@ export const messageCount = async (message: Message) => {
         inline: true,
       })
       .setFooter({
-        text: status || '',
-        iconURL: guildIcon || undefined,
+        text: status || embedFallback.FOOTER_FALLBACK,
+        iconURL: guildIcon || embedFallback.AVATAR_FALLBACK,
       });
 
     message.channel.send({ embeds: [messageCountEmbed] });
@@ -84,10 +88,11 @@ export const individualMessageCount = async (message: Message) => {
     }
     const guildName = message.guild
       ? message.guild.name
-      : 'Server name not found';
-    const fallbackAvatar = 'https://cdn.discordapp.com/embed/avatars/1.png';
-    const thumbnailUrl = user.avatarURL() ?? fallbackAvatar;
-    const iconUrl = user.avatarURL() ?? fallbackAvatar;
+      : embedFallback.SERVER_NAME_FALLBACK;
+
+    const thumbnailUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
+    const iconUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
+
     const todayEmote =
       todayCount < 200
         ? discordEmotes.JASPER_WEIRD
@@ -96,7 +101,7 @@ export const individualMessageCount = async (message: Message) => {
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
       .setDescription(`# ${guildName}`)
-      .setThumbnail(thumbnailUrl || '')
+      .setThumbnail(thumbnailUrl)
       .addFields({
         name: '```Dzisiaj```',
         value: `${todayEmote} ${JSON.stringify(todayCount, null, 0)}`,
@@ -112,7 +117,7 @@ export const individualMessageCount = async (message: Message) => {
         inline: true,
       })
       .setFooter({
-        iconURL: iconUrl?.toString(),
+        iconURL: iconUrl ? iconUrl.toString() : embedFallback.AVATAR_FALLBACK,
         text: `${user.username} | ${currentDate.toLocaleString()}`,
       });
 
