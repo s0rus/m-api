@@ -2,8 +2,10 @@ import { EmbedBuilder, Message } from 'discord.js';
 import {
   fetchDayTotalCount,
   getAverageMessageCount,
-  // getMessageCountByUserId,
+  getMessageCountByUserId,
 } from './messageCountManager';
+
+import { discordEmotes } from '../../constants/discordIds';
 
 export const messageCount = async (message: Message) => {
   const guildName = message.guild ? message.guild.name : 'Nazwa Serwera';
@@ -30,72 +32,94 @@ export const messageCount = async (message: Message) => {
       }
     }
 
+    const discordEmote =
+      todayCount < 1000
+        ? discordEmotes.JASPER_WEIRD
+        : discordEmotes.JASPER_HAPPY;
+
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
       .setDescription(`## ${guildName}`)
-      .setThumbnail(`${guildIcon}`)
+      .setThumbnail(guildIcon || '')
       .addFields({
         name: '```Dzisiaj```',
-        value: `📩 ${JSON.stringify(todayCount, null, 0)}`,
+        value: `${discordEmote} ${JSON.stringify(todayCount, null, 0)}`,
         inline: true,
       })
       .addFields({
         name: '```Średnio```',
-        value: `📩 ${avgCount ? Math.floor(avgCount) : '--'}`,
+        value: `${discordEmotes.JASPER_HAPPY} ${
+          avgCount ? Math.floor(avgCount) : '--'
+        }`,
         inline: true,
       })
       .setFooter({
-        text: `${status}`,
-        iconURL: `${guildIcon}`,
+        text: status || '',
+        iconURL: guildIcon || undefined,
       });
 
     message.channel.send({ embeds: [messageCountEmbed] });
   } catch (error) {
     console.log(error);
-    message.channel.send('Wystąpił błąd podczas pobierania danych...');
+    message.channel.send(
+      `${discordEmotes.OSTRZEZENIE} Wystąpił błąd podczas pobierania danych...`,
+    );
   }
 };
 
-// export const individualMessageCount = async (
-//   message: Message,
-//   userMention: string,
-// ) => {
-//   const userId = userMention.substring(2);
-//   const user = message.mentions.users.first();
+export const individualMessageCount = async (message: Message) => {
+  const userMention = message.content.match(/<@(\d+)>/)?.[1];
+  if (!userMention) {
+    return;
+  }
 
-//   try {
-//     const { todayCount, allTimeCount } = await getMessageCountByUserId(userId);
-//     const currentDate = new Date();
+  const userId = userMention;
+  const user = message.mentions.users.first();
 
-//     if (!user) {
-//       return;
-//     }
-//     const guildName = message.guild ? message.guild.name : 'Nazwa Serwera';
+  try {
+    const { todayCount, allTimeCount } = await getMessageCountByUserId(userId);
+    const currentDate = new Date();
 
-//     const messageCountEmbed = new EmbedBuilder()
-//       .setColor(0x6c42f5)
-//       .setDescription(`# ${guildName}`)
-//       .setThumbnail(user.avatar)
-//       .addFields({
-//         name: '```Dzisiaj```',
-//         value: `📩 ${JSON.stringify(todayCount, null, 0)}`,
-//         inline: true,
-//       })
-//       .addFields({
-//         name: '```Wszystkie```',
-//         value: `✉️ ${JSON.stringify(allTimeCount, null, 0)}`,
-//         inline: true,
-//       })
-//       .setFooter({
-//         iconURL: user.avatar ?? undefined,
-//         text: `${user.username} | ${currentDate.toLocaleString()}`, // lub `${user.tag} | ${currentDate.toLocaleString()}`
-//       });
+    if (!user) {
+      return;
+    }
+    const guildName = message.guild ? message.guild.name : 'Nazwa Serwera';
+    const avatarUrl = user.avatarURL();
+    const thumbnailUrl = avatarUrl ?? undefined;
+    const iconUrl = avatarUrl ?? null;
+    const todayEmote =
+      todayCount < 200
+        ? discordEmotes.JASPER_WEIRD
+        : discordEmotes.JASPER_HAPPY;
 
-//     message.channel.send({ embeds: [messageCountEmbed] });
-//   } catch (error) {
-//     const err = error as Error;
-//     console.log(err);
-//     console.log(userId);
-//     message.channel.send(err.message);
-//   }
-// };
+    const messageCountEmbed = new EmbedBuilder()
+      .setColor(0x6c42f5)
+      .setDescription(`# ${guildName}`)
+      .setThumbnail(thumbnailUrl || '')
+      .addFields({
+        name: '```Dzisiaj```',
+        value: `${todayEmote} ${JSON.stringify(todayCount, null, 0)}`,
+        inline: true,
+      })
+      .addFields({
+        name: '```Wszystkie```',
+        value: `${discordEmotes.JASPER_HAPPY} ${JSON.stringify(
+          allTimeCount,
+          null,
+          0,
+        )}`,
+        inline: true,
+      })
+      .setFooter({
+        iconURL: iconUrl?.toString(),
+        text: `${user.username} | ${currentDate.toLocaleString()}`,
+      });
+
+    message.channel.send({ embeds: [messageCountEmbed] });
+  } catch (error) {
+    const err = error as Error;
+    console.log(err);
+    console.log(userId);
+    message.channel.send(err.message);
+  }
+};

@@ -91,29 +91,28 @@ export async function incrementMessageCount(message: Message) {
   });
 }
 
-// export async function getMessageCountByUserId(userId: string) {
-//   const userData = await prisma.user.findFirst({
-//     where: {
-//       userId: userId,
-//     },
-//     include: {
-//       aggregations: true,
-//     },
-//   });
+export async function getMessageCountByUserId(userId: string) {
+  const userData = await prisma.user.findFirst({
+    where: {
+      userId: userId,
+    },
+    include: {
+      aggregations: true,
+    },
+  });
 
-//   if (!userData)
-//     throw new Error('Nie znaleziono użytkownika [getMessageCountByUserId].');
+  if (!userData)
+    throw new Error('Nie znaleziono użytkownika [getMessageCountByUserId].');
 
-//   const todayCount = userData.aggregations.reduce((acc, curr) => {
-//     if (curr.date === dayjs(new Date()).format('DD.MM.YYYY')) {
-//       return acc + curr.dayCount;
-//     }
+  const todayCount = userData.aggregations.reduce((acc, curr) => {
+    if (curr.date === dayjs(new Date()).format('DD.MM.YYYY')) {
+      return acc + curr.dayCount;
+    }
+    return acc;
+  }, 0);
 
-//     return acc;
-//   }, 0);
-
-//   return {
-//     todayCount,
-//     allTimeCount: userData.totalMessageCount,
-//   };
-// }
+  return {
+    todayCount,
+    allTimeCount: userData.totalMessageCount,
+  };
+}

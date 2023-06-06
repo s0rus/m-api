@@ -44,7 +44,6 @@ client.on(Events.MessageCreate, async (message) => {
     handleCommand(message);
   } catch (error) {
     console.log(error);
-    // message.channel.send('Wystąpił błąd podczas zapisywania wiadomości...');
   }
 });
 

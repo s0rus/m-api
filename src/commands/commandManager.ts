@@ -1,7 +1,8 @@
 import { Message } from 'discord.js';
 import { addAha, getAha, getRandomAha, listAha, removeAha } from './Aha/aha';
+import { discordEmotes } from '../constants/discordIds';
 import {
-  // individualMessageCount,
+  individualMessageCount,
   messageCount,
 } from './MessageCount/messageCount';
 export const COMMAND_PREFIX = '!' as const;
@@ -12,14 +13,12 @@ export type Command = {
   maxArgs?: number;
   handler: (message: Message, args: string[]) => void;
 };
-
 /*
   ! If you are adding a command that can either take arguments or not,
   ! you have to start taking the arguments from index 1, not 0 because
   ! the argument at index 0 is the dynamic value - this however you can
   ! utilize when you want to create a dynamic command like aha42 or aha69
 */
-
 const commands: { [key: string]: Command } = {
   w: {
     prefixRequired: true,
@@ -29,8 +28,8 @@ const commands: { [key: string]: Command } = {
         case 1:
           await messageCount(message);
           break;
-          // case 2:
-          //   await individualMessageCount(message, args[0].substring(2));
+        case 2:
+          await individualMessageCount(message);
           break;
         default:
           break;
@@ -72,11 +71,11 @@ const commands: { [key: string]: Command } = {
     prefixRequired: true,
     handler: async (message) => {
       const commandList = [
-        '## !<:aha:1047239820528853042> remove `[numer]` ---- usuwa aha o określonym numerze z bazy danych',
-        '## !<:aha:1047239820528853042> add `[numer]` `[url]` ---- dodaje aha o określonym numerze i gifie z discorda do bazy danych',
-        '## !<:aha:1047239820528853042> list ---- pokazuje wszystkie aha',
-        '## !<:aha:1047239820528853042> random ---- randomowe aha',
-        '## !w ---- pokazuje ilość wiadomości',
+        `## !${discordEmotes.AHA} add \`[numer]\` \`[url.gif]\``,
+        `## !${discordEmotes.AHA} remove \`[numer]\``,
+        `## !${discordEmotes.AHA} list`,
+        `## !${discordEmotes.AHA} random`,
+        `## !w / <@1054784342251024425> ---- pokazuje ilość wiadomości ogólną / użytkownika`,
       ].join('\n');
 
       message.reply(`Oto dostępne komendy:\n${commandList}`);
