@@ -4,7 +4,7 @@ import {
   getAverageMessageCount,
   getMessageCountByUserId,
 } from './messageCountManager';
-import { embedFallback } from '../..//helpers/embedFallback';
+import { embedFallback } from '../../helpers/embedFallback';
 import { discordEmotes } from '../../constants/discordIds';
 
 export const messageCount = async (message: Message) => {
@@ -89,7 +89,6 @@ export const individualMessageCount = async (message: Message) => {
     const guildName = message.guild
       ? message.guild.name
       : embedFallback.SERVER_NAME_FALLBACK;
-
     const thumbnailUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
     const iconUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
 
