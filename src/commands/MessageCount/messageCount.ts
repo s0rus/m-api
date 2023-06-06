@@ -73,7 +73,6 @@ export const individualMessageCount = async (message: Message) => {
     return;
   }
   const user = message.mentions.users.first();
-
   try {
     const { todayCount, allTimeCount } = await getMessageCountByUserId(
       userMention,
@@ -86,9 +85,9 @@ export const individualMessageCount = async (message: Message) => {
     const guildName = message.guild
       ? message.guild.name
       : 'Server name not found';
-    const thumbnailUrl =
-      user.avatarURL() ?? 'https://cdn.discordapp.com/embed/avatars/4.png';
-    const iconUrl = user.avatarURL() ?? null;
+    const fallbackAvatar = 'https://cdn.discordapp.com/embed/avatars/1.png';
+    const thumbnailUrl = user.avatarURL() ?? fallbackAvatar;
+    const iconUrl = user.avatarURL() ?? fallbackAvatar;
     const todayEmote =
       todayCount < 200
         ? discordEmotes.JASPER_WEIRD
