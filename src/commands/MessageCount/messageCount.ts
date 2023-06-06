@@ -4,7 +4,7 @@ import {
   getAverageMessageCount,
   getMessageCountByUserId,
 } from './messageCountManager';
-import { embedFallback } from 'src/helpers/embedFallback';
+import { embedFallback } from '../..//helpers/embedFallback';
 import { discordEmotes } from '../../constants/discordIds';
 
 export const messageCount = async (message: Message) => {
