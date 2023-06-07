@@ -1,83 +1,124 @@
 import { EmbedBuilder, Message } from 'discord.js';
-import { prisma } from '../../index';
 import {
   fetchDayTotalCount,
   getAverageMessageCount,
   getMessageCountByUserId,
 } from './messageCountManager';
+import { embedFallback } from '../../helpers/embedFallback';
+import { discordEmotes } from '../../constants/discordIds';
+
+const getStatus = (todayCount: number) => {
+  if (todayCount < 500) {
+    return `Umieralnia 💀`;
+  } else if (todayCount >= 500 && todayCount < 2000) {
+    return 'Hujowo ale stabilnie ☝🏿';
+  } else if (todayCount >= 2000) {
+    return 'Norma wyrobiona 😮';
+  }
+};
 
 export const messageCount = async (message: Message) => {
+  const guildName = message.guild
+    ? message.guild.name
+    : embedFallback.SERVER_NAME_FALLBACK;
+  const guildIcon = message.guild
+    ? message.guild.iconURL()
+    : embedFallback.AVATAR_FALLBACK;
+
   try {
-    const [todayCount, avgCount] = await Promise.all([
-      fetchDayTotalCount(),
-      getAverageMessageCount(),
-    ]);
+    const todayCount = await fetchDayTotalCount();
+    const avgCount = await getAverageMessageCount();
+    const status = getStatus(todayCount);
+
+    const discordEmote =
+      todayCount < 1000
+        ? discordEmotes.JASPER_WEIRD
+        : discordEmotes.JASPER_HAPPY;
 
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
-      .setDescription('Dziadkownia')
-      .setThumbnail(
-        'https://cdn.discordapp.com/emojis/1047234305191063702.webp?size=96&quality=lossless',
-      )
-
+      .setDescription(`## ${guildName}`)
+      .setThumbnail(guildIcon || '')
       .addFields({
         name: '```Dzisiaj```',
-        value: `📩 ${JSON.stringify(todayCount, null, 0)}`,
+        value: `${discordEmote} ${JSON.stringify(todayCount, null, 0)}`,
+        inline: true,
+      })
+      .addFields({
+        name: '```Średnio```',
+        value: `${discordEmotes.JASPER_HAPPY} ${
+          avgCount ? Math.floor(avgCount) : '--'
+        }`,
         inline: true,
       })
       .setFooter({
-        text: `Średnia: ${avgCount ? Math.floor(avgCount) : '--'}`,
-        iconURL:
-          'https://cdn.discordapp.com/emojis/1047234305191063702.webp?size=96&quality=lossless',
+        text: status || embedFallback.FOOTER_FALLBACK,
+        iconURL: guildIcon || embedFallback.AVATAR_FALLBACK,
       });
 
     message.channel.send({ embeds: [messageCountEmbed] });
   } catch (error) {
     console.log(error);
-    message.channel.send('Wystąpił błąd podczas pobierania danych...');
+    message.channel.send(
+      `${discordEmotes.OSTRZEZENIE} Wystąpił błąd podczas pobierania danych...`,
+    );
   }
 };
 
-export const individualMessageCount = async (
-  message: Message,
-  userMention: string,
-) => {
-  const userId = userMention.replace(/[<@!>]/g, '');
-
+export const individualMessageCount = async (message: Message) => {
+  const userMention = message.content.match(/<@(\d+)>/)?.[1];
+  if (!userMention) {
+    return;
+  }
+  const user = message.mentions.users.first();
   try {
-    const { todayCount, allTimeCount } = await getMessageCountByUserId(userId);
+    const { todayCount, allTimeCount } = await getMessageCountByUserId(
+      userMention,
+    );
     const currentDate = new Date();
-
-    const user = await prisma.user.findFirst({
-      where: { userId },
-    });
 
     if (!user) {
       return;
     }
+    const guildName = message.guild
+      ? message.guild.name
+      : embedFallback.SERVER_NAME_FALLBACK;
+    const thumbnailUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
+    const iconUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
+
+    const todayEmote =
+      todayCount < 200
+        ? discordEmotes.JASPER_WEIRD
+        : discordEmotes.JASPER_HAPPY;
 
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
-      .setDescription('Dawidownia')
-      .setThumbnail(user.avatar)
+      .setDescription(`# ${guildName}`)
+      .setThumbnail(thumbnailUrl)
       .addFields({
         name: '```Dzisiaj```',
-        value: `📩 ${JSON.stringify(todayCount, null, 0)}`,
+        value: `${todayEmote} ${JSON.stringify(todayCount, null, 0)}`,
         inline: true,
       })
       .addFields({
         name: '```Wszystkie```',
-        value: `✉️ ${JSON.stringify(allTimeCount, null, 0)}`,
+        value: `${discordEmotes.JASPER_HAPPY} ${JSON.stringify(
+          allTimeCount,
+          null,
+          0,
+        )}`,
         inline: true,
       })
       .setFooter({
-        iconURL: user.avatar ?? undefined,
-        text: `${user.name} | ${currentDate.toLocaleString()}`,
+        iconURL: iconUrl ? iconUrl.toString() : embedFallback.AVATAR_FALLBACK,
+        text: `${user.username} | ${currentDate.toLocaleString()}`,
       });
+
     message.channel.send({ embeds: [messageCountEmbed] });
   } catch (error) {
     const err = error as Error;
     console.log(err);
+    console.log(userMention);
     message.channel.send(err.message);
   }
 };

@@ -13,7 +13,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^4.14.0",
+    "@prisma/client": "^4.15.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.6",
     "discord.js": "^14.6.0",

@@ -8,9 +8,7 @@ export default async function handleAvatarUpdate(
 ) {
   const guild = client.guilds.cache.get(channelIds.GUILD_ID);
   if (!guild) return;
-
   const user = message.author;
-
   const avatarUrl = user.avatarURL();
   if (!avatarUrl) return;
 

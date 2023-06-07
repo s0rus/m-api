@@ -33,7 +33,6 @@ const client = new Client({
 
 client.once(Events.ClientReady, async () => {
   console.log('Discord watcher ready');
-  // pingInstantBattle(client);
 });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -45,7 +44,6 @@ client.on(Events.MessageCreate, async (message) => {
     handleCommand(message);
   } catch (error) {
     console.log(error);
-    // message.channel.send('Wystąpił błąd podczas zapisywania wiadomości...');
   }
 });
 
