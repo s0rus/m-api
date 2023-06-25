@@ -116,3 +116,14 @@ export async function getMessageCountByUserId(userId: string) {
     allTimeCount: userData.totalMessageCount,
   };
 }
+
+export async function getTopThreeDays() {
+  const topThreeDays = await prisma.aggregatedData.findMany({
+    orderBy: {
+      count: 'desc',
+    },
+    take: 3,
+  });
+
+  return topThreeDays.map(({ date, count }) => ({ date, count }));
+}

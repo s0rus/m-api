@@ -4,8 +4,8 @@ export const channelIds = {
 } as const;
 
 export const discordRoles = {
-  NOSTALE_ROLE: '1105114171504328806',
   ADMIN_ROLE: '1049323068104921098',
+  MUTED_ROLE: '1063888306053578772',
 } as const;
 
 export const discordEmotes = {
@@ -15,6 +15,7 @@ export const discordEmotes = {
   AHA: '<:aha:1047239820528853042>',
   JASPER_HAPPY: '<:jasperHappy:1047239809208426656>',
   JASPER_WEIRD: '<:Weird:1047239828095389737>',
+  SIGMA: '<:sigma:1080595607120511016>',
 } as const;
 
 export type DiscordId = (typeof channelIds)[keyof typeof channelIds];

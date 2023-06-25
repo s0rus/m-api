@@ -3,9 +3,11 @@ import { addAha, getAha, getRandomAha, listAha, removeAha } from './Aha/aha';
 import {
   individualMessageCount,
   messageCount,
+  topThreeDays,
 } from './MessageCount/messageCount';
 export const COMMAND_PREFIX = '!' as const;
-
+import { muteUser, unmuteUser } from './Mute/Mute';
+import { getTopThreeDays } from './MessageCount/messageCountManager';
 export type Command = {
   prefixRequired?: boolean;
   minArgs?: number;
@@ -66,6 +68,24 @@ const commands: { [key: string]: Command } = {
       }
     },
   },
+  mute: {
+    prefixRequired: true,
+    handler: async (message, args) => {
+      await muteUser(message, args);
+    },
+  },
+  unmute: {
+    prefixRequired: true,
+    handler: async (message) => {
+      await unmuteUser(message);
+    },
+  },
+  top: {
+    prefixRequired: true,
+    handler: async (message) => {
+      await topThreeDays(message);
+    },
+  },
   komendy: {
     prefixRequired: true,
     handler: async (message) => {
@@ -75,6 +95,7 @@ const commands: { [key: string]: Command } = {
         '!aha list',
         '!aha random',
         '!w / <@1054784342251024425> ---- pokazuje ilość wiadomości ogólną / użytkownika',
+        '!mute <@1054784342251024425> ---- wycisza / odcisza użytkownika',
       ].join('\n');
 
       message.reply(`Oto dostępne komendy:\n${commandList}`);

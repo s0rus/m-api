@@ -3,32 +3,22 @@ import {
   fetchDayTotalCount,
   getAverageMessageCount,
   getMessageCountByUserId,
+  getTopThreeDays,
 } from './messageCountManager';
 import { embedFallback } from '../../helpers/embedFallback';
 import { discordEmotes } from '../../constants/discordIds';
 
-const getStatus = (todayCount: number) => {
-  if (todayCount < 500) {
-    return `Umieralnia 💀`;
-  } else if (todayCount >= 500 && todayCount < 2000) {
-    return 'Hujowo ale stabilnie ☝🏿';
-  } else if (todayCount >= 2000) {
-    return 'Norma wyrobiona 😮';
-  }
-};
+const getStatus = (todayCount: number, avgCount: number) =>
+  todayCount < avgCount ? 'Umieralnia 💀' : 'Norma wyrobiona 😮';
 
 export const messageCount = async (message: Message) => {
-  const guildName = message.guild
-    ? message.guild.name
-    : embedFallback.SERVER_NAME_FALLBACK;
-  const guildIcon = message.guild
-    ? message.guild.iconURL()
-    : embedFallback.AVATAR_FALLBACK;
+  const guildName = message.guild?.name || embedFallback.SERVER_NAME_FALLBACK;
+  const guildIcon = message.guild?.iconURL() || embedFallback.AVATAR_FALLBACK;
 
   try {
     const todayCount = await fetchDayTotalCount();
     const avgCount = await getAverageMessageCount();
-    const status = getStatus(todayCount);
+    const status = getStatus(todayCount, avgCount);
 
     const discordEmote =
       todayCount < 1000
@@ -71,6 +61,7 @@ export const individualMessageCount = async (message: Message) => {
     return;
   }
   const user = message.mentions.users.first();
+
   try {
     const { todayCount, allTimeCount } = await getMessageCountByUserId(
       userMention,
@@ -80,9 +71,7 @@ export const individualMessageCount = async (message: Message) => {
     if (!user) {
       return;
     }
-    const guildName = message.guild
-      ? message.guild.name
-      : embedFallback.SERVER_NAME_FALLBACK;
+    const guildName = message.guild?.name || embedFallback.SERVER_NAME_FALLBACK;
     const thumbnailUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
     const iconUrl = user.avatarURL() ?? embedFallback.AVATAR_FALLBACK;
 
@@ -120,5 +109,27 @@ export const individualMessageCount = async (message: Message) => {
     console.log(err);
     console.log(userMention);
     message.channel.send(err.message);
+  }
+};
+
+export const topThreeDays = async (message: Message) => {
+  try {
+    const topThreeDays = await getTopThreeDays();
+
+    const fields = topThreeDays.map((day, index) => ({
+      name: `${index + 1}. Liczba: **${day.count}**`,
+      value: `Data: ${day.date}`,
+      inline: false,
+    }));
+
+    const topDaysEmbed = new EmbedBuilder()
+      .setColor(0x6c42f5)
+      .setTitle('Top 3 dni z największą ilością wiadomości.')
+      .addFields(fields);
+
+    message.channel.send({ embeds: [topDaysEmbed] });
+  } catch (error) {
+    console.log(error);
+    message.channel.send('Wystąpił błąd podczas pobierania danych.');
   }
 };
