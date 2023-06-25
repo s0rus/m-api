@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { Message } from 'discord.js';
 import { prisma } from '../../index';
+import { Prisma } from '@prisma/client';
 
 export async function fetchDayTotalCount() {
   const todayRecords = await prisma.messageAggregation.findMany({
@@ -119,11 +120,13 @@ export async function getMessageCountByUserId(userId: string) {
 
 export async function getTopThreeDays() {
   const topThreeDays = await prisma.aggregatedData.findMany({
-    orderBy: {
-      count: 'desc',
-    },
+    orderBy: [
+      {
+        count: Prisma.SortOrder.desc,
+      },
+    ],
     take: 3,
   });
 
-  return topThreeDays.map(({ date, count }) => ({ date, count }));
+  return topThreeDays;
 }
