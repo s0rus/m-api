@@ -9,9 +9,7 @@ import { PrismaClient } from '@prisma/client';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { incrementMessageCount } from './commands/MessageCount/messageCountManager';
 import { handleCommand } from './commands/commandManager';
-import handleAvatarUpdate from './helpers/avatarUpdate';
 
 export const prisma = new PrismaClient({
   log: ['error'],
@@ -21,7 +19,7 @@ const token = process.env.DISCORD_BOT_TOKEN;
 dayjs.extend(timezone);
 dayjs.tz.setDefault('Europe/Warsaw');
 
-const client = new Client({
+export const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -37,10 +35,10 @@ client.once(Events.ClientReady, async () => {
 
 client.on(Events.MessageCreate, async (message) => {
   try {
-    await Promise.all([
-      incrementMessageCount(message),
-      handleAvatarUpdate(client, message),
-    ]);
+    // await Promise.all([
+    //   incrementMessageCount(message),
+    //   handleAvatarUpdate(client, message),
+    // ]);
     handleCommand(message);
   } catch (error) {
     console.log(error);

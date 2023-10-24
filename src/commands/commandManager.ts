@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import { addAha, getAha, getRandomAha, listAha, removeAha } from './Aha/aha';
+import { handleEssa, handleEssaRanking } from './Essa/essa';
 import {
   individualMessageCount,
   messageCount,
@@ -33,6 +34,18 @@ const commands: { [key: string]: Command } = {
         default:
           break;
       }
+    },
+  },
+  essa: {
+    prefixRequired: true,
+    handler: async (message) => {
+      await handleEssa(message);
+    },
+  },
+  ranking: {
+    prefixRequired: true,
+    handler: async (message) => {
+      await handleEssaRanking(message);
     },
   },
   aha: {
