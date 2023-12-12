@@ -10,5 +10,8 @@ services:
       - '5000:5000'
     image: s0ruse/m-api:latest
     environment:
-      - API_DATABASE_URL=mysql://u6ysntbeai35184fbojz:pscale_pw_UoINWp5OMa4m8fV0DmrwDfnoYAkJq1oRSFcLHgfejcc@eu-west.connect.psdb.cloud/dziadkownia?sslaccept=strict
-      - DISCORD_BOT_TOKEN=MTA1NDc4NDM0MjI1MTAyNDQyNQ.GPlnq9.iu3UFQ7KQA2Z9UNb8SgaFGJ1nLsajNzpMk3V5g
+      - TZ=Europe/Warsaw
+      - DATABASE_URL=${DATABASE_URL}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - ESSA_API_URL=${ESSA_API_URL}
+      - ESSA_API_KEY=${ESSA_API_KEY}
