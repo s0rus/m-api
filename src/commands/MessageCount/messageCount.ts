@@ -1,19 +1,19 @@
 import { EmbedBuilder, Message } from 'discord.js';
+import { discordEmotes } from '../../constants/discordIds';
+import { embedFallback } from '../../helpers/embedFallback';
 import {
   fetchDayTotalCount,
   getAverageMessageCount,
   getMessageCountByUserId,
 } from './messageCountManager';
-import { embedFallback } from '../../helpers/embedFallback';
-import { discordEmotes } from '../../constants/discordIds';
 
-const getStatus = (todayCount: number) => {
-  if (todayCount < 500) {
-    return `Umieralnia 💀`;
-  } else if (todayCount >= 500 && todayCount < 2000) {
-    return 'Hujowo ale stabilnie ☝🏿';
-  } else if (todayCount >= 2000) {
+const getStatus = (todayCount: number, avgCount: number) => {
+  if (todayCount >= avgCount) {
     return 'Norma wyrobiona 😮';
+  } else if (todayCount >= avgCount / 2 && todayCount < avgCount) {
+    return 'Chujowo ale stabilnie ☝🏿';
+  } else if (todayCount < avgCount / 2) {
+    return 'Umieralnia 💀';
   }
 };
 
@@ -28,7 +28,7 @@ export const messageCount = async (message: Message) => {
   try {
     const todayCount = await fetchDayTotalCount();
     const avgCount = await getAverageMessageCount();
-    const status = getStatus(todayCount);
+    const status = getStatus(todayCount, avgCount);
 
     const discordEmote =
       todayCount < 1000
@@ -93,7 +93,7 @@ export const individualMessageCount = async (message: Message) => {
 
     const messageCountEmbed = new EmbedBuilder()
       .setColor(0x6c42f5)
-      .setDescription(`# ${guildName}`)
+      .setDescription(`# ${user.username || guildName}`)
       .setThumbnail(thumbnailUrl)
       .addFields({
         name: '```Dzisiaj```',
