@@ -8,6 +8,7 @@ export const env = createEnv({
     DISCORD_BOT_TOKEN: z.string().min(1),
     ESSA_API_URL: z.string().url(),
     ESSA_API_KEY: z.string().min(1),
+    AUTH_TOKEN: z.string().min(1),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
