@@ -1,34 +1,42 @@
-FROM node:18 as builder
+FROM oven/bun:1 as base
+WORKDIR /usr/src/app
 
-WORKDIR usr/src/app
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lockb /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-COPY prisma ./
+RUN mkdir -p /temp/prod
+COPY package.json bun.lockb /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-COPY package*.json ./
-
-RUN npm install
-
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
-RUN npm run build
+FROM base AS production
+COPY --from=install /temp/prod/node_modules node_modules
+COPY ./prisma ./prisma
+COPY ./src ./src
+COPY ./tsconfig.json .
+COPY --from=prerelease /usr/src/app/package.json .
 
-FROM node:18 as production
-
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
+ENV NODE_ENV=production
 ARG DISCORD_BOT_TOKEN
 ARG DATABASE_URL
+ARG ESSA_API_URL
+ARG ESSA_API_KEY
+ARG NODE_VERSION=20
 
-WORKDIR usr/src/app
+RUN apt update \
+    && apt install -y curl
+RUN curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n \
+    && bash n $NODE_VERSION \
+    && rm n \
+    && npm install -g n
 
-COPY --from=builder usr/src/app/node_modules ./node_modules
-COPY . .
-RUN npm ci --only=production
-RUN npx prisma generate
+RUN bunx prisma generate
 
-COPY --from=builder /usr/src/app/dist ./dist
-
+USER bun
 EXPOSE 5000
-
-CMD ["node", "dist/index.js"]
+ENTRYPOINT [ "bun", "run", "src/index.ts" ]
