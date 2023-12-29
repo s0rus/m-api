@@ -1,11 +1,12 @@
 export const fallback = {
-  AVATAR_FALLBACK: 'https://cdn.discordapp.com/embed/avatars/1.png',
+  AVATAR: 'https://cdn.discordapp.com/embed/avatars/1.png',
   USERNAME: '<unknown user>',
   SERVER: '<unknown server>',
 } as const;
 
 export const discordId = {
   GUILD_ID: '1046777564775067728',
+  BOT_ID: '1054784342251024425',
 } as const;
 
 export const discordEmote = {

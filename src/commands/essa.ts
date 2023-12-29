@@ -1,4 +1,5 @@
 import { env } from '@/env';
+import { _WrappedManager } from '@/lib/_wrapped/wrapped-manager';
 import { fallback } from '@/lib/constants';
 import { getTimeToReset } from '@/lib/utils';
 import type { IEssa, TClient, TCommand } from '@/types';
@@ -18,22 +19,27 @@ export const command: TCommand = {
       message.reply({
         embeds: [essaEmbed],
       });
+
+      await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, essaById.essa);
+
       return;
     } else {
-      await fetch(`${env.ESSA_API_URL}/essa/${messageAuthorId}`, {
+      await fetch(`${env.ESSA_API_URL}/essa/${mentionedUserId ?? messageAuthorId}`, {
         headers: {
           Authorization: `Bearer ${env.ESSA_API_KEY}`,
         },
         method: 'POST',
       });
 
-      const newEssa = await getEssaByUserId(messageAuthorId);
-      if (newEssa) {
-        const essaEmbed = await getUserEssaEmbed(client, newEssa);
+      const generatedEssaById = await getEssaByUserId(mentionedUserId ?? messageAuthorId);
+      if (generatedEssaById) {
+        const essaEmbed = await getUserEssaEmbed(client, generatedEssaById);
 
         message.reply({
           embeds: [essaEmbed],
         });
+
+        await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, generatedEssaById.essa);
         return;
       }
 
@@ -81,7 +87,7 @@ const getUserEssaEmbed = async (client: TClient, essaData: IEssa) => {
     )
     .setAuthor({
       name: user.username ?? fallback.USERNAME,
-      iconURL: user.avatarURL() ?? fallback.AVATAR_FALLBACK,
+      iconURL: user.avatarURL() ?? fallback.AVATAR,
     })
     .setFooter({
       text: `Następne użycie dostępne za: ${hours} godzin(y) i ${minutes} minut(y)`,

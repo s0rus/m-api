@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+  // relationMode = "prisma"
 }
 
 model AggregatedData {
@@ -21,6 +21,8 @@ model User {
   name              String
   totalMessageCount Int                  @default(0)
   aggregations      MessageAggregation[]
+
+  userWrapped UserWrapped?
 }
 
 model MessageAggregation {
@@ -36,4 +38,53 @@ model MessageAggregation {
 model AhaGifs {
   id  Int    @id @unique
   url String
+}
+
+model UserWrapped {
+  id String @id @unique @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId])
+
+  statAggregation    StatAggregation?
+  essaAggregation    EssaAggregation[]
+  commandAggregation CommandAggregation[]
+}
+
+model StatAggregation {
+  id String @id @unique @default(cuid())
+
+  reactionCount   Int @default(0)
+  attachmentCount Int @default(0)
+  gifCount        Int @default(0)
+  replyCount      Int @default(0)
+  mentionCount    Int @default(0)
+
+  userWrappedId String      @unique
+  userWrapped   UserWrapped @relation(fields: [userWrappedId], references: [userId])
+}
+
+model EssaAggregation {
+  id        String   @id @unique @default(cuid())
+  createdAt DateTime @default(now())
+
+  date String
+  essa Int
+
+  userWrappedId String
+  userWrapped   UserWrapped @relation(fields: [userWrappedId], references: [userId])
+
+  @@index([userWrappedId])
+}
+
+model CommandAggregation {
+  id String @id @unique @default(cuid())
+
+  commandName String
+  usageCount  Int    @default(0)
+
+  userWrappedId String
+  userWrapped   UserWrapped @relation(fields: [userWrappedId], references: [userId])
+
+  @@index([userWrappedId])
 }

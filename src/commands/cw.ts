@@ -49,7 +49,7 @@ const getCwUserId = async (): Promise<string | null> => {
 const getCwEmbed = async (client: TClient, userId: string) => {
   const cw = await client.users.fetch(userId);
   const username = cw.username ?? fallback.USERNAME;
-  const avatar = cw.avatarURL() ?? fallback.AVATAR_FALLBACK;
+  const avatar = cw.avatarURL() ?? fallback.AVATAR;
 
   return new EmbedBuilder()
     .setTitle(`Cwel dnia | ${dayjs().format('DD/MM/YY')}`)

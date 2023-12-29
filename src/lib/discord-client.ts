@@ -1,9 +1,10 @@
 import { incrementMessageCount } from '@/commands/w';
 import { env } from '@/env';
 import { TClient, TCommand } from '@/types';
-import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
+import { Client, Collection, EmbedType, Events, GatewayIntentBits, Partials } from 'discord.js';
 import fs from 'node:fs';
 import path from 'node:path';
+import { _WrappedManager } from './_wrapped/wrapped-manager';
 import handleAvatarUpdate, { logger } from './utils';
 
 export class DiscordClient {
@@ -23,7 +24,9 @@ export class DiscordClient {
           GatewayIntentBits.MessageContent,
           GatewayIntentBits.GuildMessageTyping,
           GatewayIntentBits.GuildMessageReactions,
+          GatewayIntentBits.GuildEmojisAndStickers,
         ],
+        partials: [Partials.Message, Partials.Channel, Partials.Reaction],
       }) as TClient;
     }
     return DiscordClient.instance;
@@ -45,7 +48,7 @@ export class DiscordClient {
 
       this.getInstance().on(Events.ClientReady, (client) => {
         client.on(Events.MessageCreate, async (message) => {
-          Promise.all([incrementMessageCount(message), handleAvatarUpdate(this.getInstance(), message)]);
+          await Promise.all([incrementMessageCount(message), handleAvatarUpdate(this.getInstance(), message)]);
 
           if (message.content.startsWith(this.COMMAND_PREFIX)) {
             const [commandName, ...args] = message.content.split(' ');
@@ -53,20 +56,66 @@ export class DiscordClient {
               commandName.toLowerCase().replace(this.COMMAND_PREFIX, '')
             );
 
-            if (!prefixedCommand) {
-              return;
-            }
-
-            try {
-              await prefixedCommand.execute({
-                client: this.getInstance(),
-                message,
-                args,
-              });
-            } catch (error) {
-              logger.error(`Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed`);
+            if (prefixedCommand) {
+              try {
+                await prefixedCommand.execute({
+                  client: this.getInstance(),
+                  message,
+                  args,
+                });
+                await _WrappedManager.incrementCommandUsageCount(message.author.id, prefixedCommand.name);
+              } catch (error) {
+                logger.error(`Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed`);
+              }
             }
           }
+
+          if (message.reference) {
+            await _WrappedManager.incrementReplyCount(message.author.id);
+          }
+
+          if (message.attachments.size > 0) {
+            await _WrappedManager.incrementAttachmentCount(message.author.id, message.attachments.size);
+          }
+
+          if (message.embeds.length > 0) {
+            const gifCount = message.embeds.filter(
+              (embed) => embed.data.type === EmbedType.Image || embed.data.type === EmbedType.GIFV
+            ).length;
+            if (gifCount > 0) {
+              await _WrappedManager.incrementGifCount(message.author.id, gifCount);
+            }
+          }
+
+          if (message.mentions.users.size > 0 && !message.reference) {
+            await _WrappedManager.incrementMentionCount(message.author.id, message.mentions.users.size);
+          }
+        });
+
+        client.on(Events.MessageReactionAdd, async (reaction, user) => {
+          if (reaction.partial) {
+            try {
+              await reaction.fetch();
+            } catch (error) {
+              console.error('Something went wrong when fetching the message:', error);
+              return;
+            }
+          }
+
+          await _WrappedManager.incrementReactionCount(user.id);
+        });
+
+        client.on(Events.MessageReactionRemove, async (reaction, user) => {
+          if (reaction.partial) {
+            try {
+              await reaction.fetch();
+            } catch (error) {
+              logger.error(`Something went wrong when fetching the message: ${error}`);
+              return;
+            }
+          }
+
+          await _WrappedManager.decrementReactionCount(user.id);
         });
       });
 

@@ -1,4 +1,5 @@
 import { TClient } from '@/types';
+import { Prisma } from '@prisma/client';
 import chalk from 'chalk';
 import dayjs from 'dayjs';
 import type { Message } from 'discord.js';
@@ -68,9 +69,17 @@ export const logger = {
   },
   chatlog: (message: Message) => {
     console.log(
-      `${chalk.bgCyan.white(`[${dayjs(message.createdAt).format('DD/MM/YYYY hh:mm A')}]`)} ${
+      `${chalk.bgCyan.white(`[${dayjs(message.createdAt).format('DD/MM/YYYY hh:mm A')}]`)} ${chalk.bold.bgGrey.white(
         message.author.username
-      }: ${message.content}`
+      )}: ${message.content}`
     );
   },
 };
+
+export function handleError(e: unknown) {
+  if (e instanceof Prisma.PrismaClientKnownRequestError) {
+    logger.error(e.message);
+  } else {
+    logger.error(`There was unexpected error: ${e}`);
+  }
+}

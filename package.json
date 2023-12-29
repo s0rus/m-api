@@ -8,7 +8,8 @@
     "build": "bun build ./src/index.ts ./src/commands/* --target bun --outdir dist/ ",
     "start": "bunx prisma db push && bun ./dist/index.js",
     "db:generate": "bunx prisma generate",
-    "db:push": "bunx prisma db push"
+    "db:push": "bunx prisma db push",
+    "db:studio": "bunx prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",

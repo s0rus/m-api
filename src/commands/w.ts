@@ -4,7 +4,7 @@ import { EmbedBuilder, type Message } from 'discord.js';
 
 import { env } from '@/env';
 import { discordEmote, fallback } from '@/lib/constants';
-import { logger } from '@/lib/utils';
+import { handleError, logger } from '@/lib/utils';
 import type { TCommand } from '@/types';
 
 export const command: TCommand = {
@@ -51,34 +51,33 @@ export const command: TCommand = {
 };
 
 export async function fetchDayTotalCount() {
-  const todayRecords = await db.messageAggregation.findMany({
+  const dayTotalAggregation = await db.messageAggregation.aggregate({
     where: {
       date: dayjs(new Date()).format('DD.MM.YYYY'),
     },
+    _sum: {
+      dayCount: true,
+    },
   });
 
-  return todayRecords.reduce((acc, curr) => acc + curr.dayCount, 0);
+  return dayTotalAggregation._sum.dayCount;
 }
 
 export async function getAverageMessageCount() {
-  const allTimeRecords = await db.messageAggregation.findMany();
+  const averageCountAggregation = await db.messageAggregation.aggregate({
+    where: {
+      NOT: {
+        date: {
+          equals: dayjs(new Date()).format('DD.MM.YYYY'),
+        },
+      },
+    },
+    _avg: {
+      dayCount: true,
+    },
+  });
 
-  const recordsWithoutToday = allTimeRecords.filter((record) => record.date !== dayjs(new Date()).format('DD.MM.YYYY'));
-
-  if (!recordsWithoutToday) {
-    return null;
-  }
-
-  const countWithoutToday = recordsWithoutToday.reduce((acc, curr) => acc + curr.dayCount, 0);
-  const uniqueDays = recordsWithoutToday.reduce((acc, curr) => {
-    if (!acc.includes(curr.date)) {
-      acc.push(curr.date);
-    }
-
-    return acc;
-  }, [] as string[]);
-
-  return countWithoutToday / uniqueDays.length;
+  return averageCountAggregation._avg.dayCount;
 }
 
 export async function getMessageCountByUserId(userId: string) {
@@ -95,8 +94,10 @@ export async function getMessageCountByUserId(userId: string) {
     throw new Error(`User of id ${userId} not found.`);
   }
 
+  const today = dayjs(new Date()).format('DD.MM.YYYY');
+
   const todayCount = userData.aggregations.reduce((acc, curr) => {
-    if (curr.date === dayjs(new Date()).format('DD.MM.YYYY')) {
+    if (curr.date === today) {
       return acc + curr.dayCount;
     }
     return acc;
@@ -109,19 +110,21 @@ export async function getMessageCountByUserId(userId: string) {
 }
 
 export async function incrementMessageCount(message: Message) {
-  if (env.NODE_ENV === 'development') {
+  if (env.NODE_ENV === 'development' && env.DATABASE_URL.startsWith('mysql')) {
     return;
   }
 
   try {
     logger.chatlog(message);
 
+    const date = dayjs(new Date()).format('DD.MM.YYYY');
+
     const messageAuthorId = message.author.id;
     const messageAuthorUsername = message.author.username;
 
     const potentialAggregation = await db.messageAggregation.findFirst({
       where: {
-        date: dayjs(new Date()).format('DD.MM.YYYY'),
+        date,
         userId: messageAuthorId,
       },
     });
@@ -144,7 +147,7 @@ export async function incrementMessageCount(message: Message) {
               id: potentialAggregation?.id ?? '',
             },
             create: {
-              date: dayjs(new Date()).format('DD.MM.YYYY'),
+              date,
               dayCount: 1,
             },
             update: {
@@ -154,6 +157,15 @@ export async function incrementMessageCount(message: Message) {
             },
           },
         },
+        userWrapped: {
+          upsert: {
+            where: {
+              userId: messageAuthorId,
+            },
+            create: {},
+            update: {},
+          },
+        },
       },
       create: {
         userId: messageAuthorId,
@@ -161,9 +173,12 @@ export async function incrementMessageCount(message: Message) {
         totalMessageCount: 1,
         aggregations: {
           create: {
-            date: dayjs(new Date()).format('DD.MM.YYYY'),
+            date,
             dayCount: 1,
           },
+        },
+        userWrapped: {
+          create: {},
         },
       },
       include: {
@@ -171,8 +186,7 @@ export async function incrementMessageCount(message: Message) {
       },
     });
   } catch (error) {
-    const err = error as Error;
-    logger.error(err.message);
+    handleError(error);
   }
 }
 
@@ -189,7 +203,7 @@ export const getMessageCountEmbed = ({
 }) => {
   if (type === 'individual') {
     const username = message.mentions.users.first()?.username ?? fallback.USERNAME;
-    const avatar = message.mentions.users.first()?.avatarURL() ?? fallback.AVATAR_FALLBACK;
+    const avatar = message.mentions.users.first()?.avatarURL() ?? fallback.AVATAR;
 
     return new EmbedBuilder()
       .setTitle(`Liczba wiadomości | ${dayjs().format('DD/MM/YY HH:mm')}`)
@@ -209,7 +223,7 @@ export const getMessageCountEmbed = ({
       ]);
   }
 
-  const guildIcon = message?.guild?.iconURL() ?? fallback.AVATAR_FALLBACK;
+  const guildIcon = message?.guild?.iconURL() ?? fallback.AVATAR;
   const status = getCountStatus({
     todayCount: firstValue,
     avgCount: secondValue,
