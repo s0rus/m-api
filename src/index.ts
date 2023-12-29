@@ -9,4 +9,10 @@ dayjs.tz.setDefault('Europe/Warsaw');
 process.env.TZ = 'Europe/Warsaw';
 dayjs.extend(customParseFormat);
 
-export default api;
+export default {
+  port: 5000,
+  fetch: api.fetch,
+} as {
+  port: number;
+  fetch: typeof api.fetch;
+};
