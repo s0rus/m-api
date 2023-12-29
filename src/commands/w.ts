@@ -64,20 +64,25 @@ export async function fetchDayTotalCount() {
 }
 
 export async function getAverageMessageCount() {
-  const averageCountAggregation = await db.messageAggregation.aggregate({
+  const daySumAggregation = await db.messageAggregation.groupBy({
     where: {
-      NOT: {
-        date: {
+      date: {
+        not: {
           equals: dayjs(new Date()).format('DD.MM.YYYY'),
         },
       },
     },
-    _avg: {
+    by: 'date',
+    _sum: {
       dayCount: true,
     },
   });
 
-  return averageCountAggregation._avg.dayCount;
+  return (
+    daySumAggregation.reduce((acc, v) => {
+      return acc + (v?._sum?.dayCount ?? 0);
+    }, 0) / daySumAggregation.length
+  );
 }
 
 export async function getMessageCountByUserId(userId: string) {
