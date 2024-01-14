@@ -65,7 +65,10 @@ export class DiscordClient {
                 });
                 await _WrappedManager.incrementCommandUsageCount(message.author.id, prefixedCommand.name);
               } catch (error) {
-                logger.error(`Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed`);
+                const err = error as Error;
+                logger.error(
+                  `Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed: ${err.message}`
+                );
               }
             }
           }

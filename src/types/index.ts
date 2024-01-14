@@ -21,7 +21,25 @@ export type TExecute = ({
 }) => Promise<void>;
 
 export interface IEssa {
-  id: string;
-  essa: number;
-  quote: string;
+  ID: number;
+  User: string;
+  Value: number;
+  Description: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+export interface IPersonOfTheDay {
+  ID: number;
+  User: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+export interface IJakiJan {
+  ID: number;
+  User: string;
+  JakiJan: string;
+  CreatedAt: string;
+  UpdatedAt: string;
 }

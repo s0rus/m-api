@@ -17,3 +17,9 @@ export const discordEmote = {
   JASPER_HAPPY: '<:jasperHappy:1047239809208426656>',
   JASPER_WEIRD: '<:Weird:1047239828095389737>',
 } as const;
+
+export const janapiRoutes = {
+  essa: '/essa',
+  personOfTheDay: '/personoftheday',
+  jakiJan: '/jakijan',
+} as const;

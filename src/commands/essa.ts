@@ -1,6 +1,6 @@
 import { env } from '@/env';
 import { _WrappedManager } from '@/lib/_wrapped/wrapped-manager';
-import { fallback } from '@/lib/constants';
+import { fallback, janapiRoutes } from '@/lib/constants';
 import { getTimeToReset } from '@/lib/utils';
 import type { IEssa, TClient, TCommand } from '@/types';
 import { EmbedBuilder } from 'discord.js';
@@ -20,11 +20,11 @@ export const command: TCommand = {
         embeds: [essaEmbed],
       });
 
-      await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, essaById.essa);
+      await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, essaById.Value);
 
       return;
     } else {
-      await fetch(`${env.ESSA_API_URL}/essa/${mentionedUserId ?? messageAuthorId}`, {
+      await fetch(`${env.ESSA_API_URL}${janapiRoutes.essa}/${mentionedUserId ?? messageAuthorId}`, {
         headers: {
           Authorization: `Bearer ${env.ESSA_API_KEY}`,
         },
@@ -39,21 +39,21 @@ export const command: TCommand = {
           embeds: [essaEmbed],
         });
 
-        await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, generatedEssaById.essa);
+        await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, generatedEssaById.Value);
         return;
       }
 
       message.reply({
         content: 'Wystąpił nieoczekiwany błąd przy pobieraniu essy xd',
       });
-      throw new Error();
+      return;
     }
   },
   prefixRequired: true,
 };
 
 const getEssaByUserId = async (userId: string): Promise<IEssa | null> => {
-  const response = await fetch(`${env.ESSA_API_URL}/essa/${userId}`, {
+  const response = await fetch(`${env.ESSA_API_URL}${janapiRoutes.essa}/${userId}`, {
     headers: {
       Authorization: `Bearer ${env.ESSA_API_KEY}`,
     },
@@ -74,15 +74,15 @@ const getEssaByUserId = async (userId: string): Promise<IEssa | null> => {
 };
 
 const getUserEssaEmbed = async (client: TClient, essaData: IEssa) => {
-  const user = await client.users.fetch(essaData.id);
+  const user = await client.users.fetch(essaData.User);
 
   const { hours, minutes } = getTimeToReset();
 
   return new EmbedBuilder()
     .setTitle('Dzisiejsza essa:')
     .setDescription(
-      `> # ${essaData.essa}%  
-      ### ${essaData.quote}
+      `> # ${essaData.Value}%  
+      ### ${essaData.Description}
       `
     )
     .setAuthor({

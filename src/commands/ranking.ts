@@ -1,5 +1,5 @@
 import { env } from '@/env';
-import { fallback } from '@/lib/constants';
+import { fallback, janapiRoutes } from '@/lib/constants';
 import { getTimeToReset } from '@/lib/utils';
 import type { IEssa, TClient, TCommand } from '@/types';
 import dayjs from 'dayjs';
@@ -11,7 +11,7 @@ export const command: TCommand = {
     const essaList = await getEssaList();
 
     if (essaList) {
-      const sortedEssaList = essaList.sort((a, b) => b.essa - a.essa);
+      const sortedEssaList = essaList.sort((a, b) => b.Value - a.Value);
       const essaRankingFields = await buildEmbedFields(client, sortedEssaList);
       const { hours, minutes } = getTimeToReset();
 
@@ -31,14 +31,14 @@ export const command: TCommand = {
       message.reply({
         content: 'Ranking jest pusty lub wystąpił błąd podczas pobierania.',
       });
-      throw new Error();
+      return;
     }
   },
   prefixRequired: true,
 };
 
 const getEssaList = async (): Promise<IEssa[] | null> => {
-  const response = await fetch(`${env.ESSA_API_URL}/essa`, {
+  const response = await fetch(`${env.ESSA_API_URL}${janapiRoutes.essa}`, {
     headers: {
       Authorization: `Bearer ${env.ESSA_API_KEY}`,
     },
@@ -49,22 +49,18 @@ const getEssaList = async (): Promise<IEssa[] | null> => {
     return null;
   }
 
-  const essaList = (await response.json()) as IEssa[] | null;
-
-  if (!essaList) {
-    return null;
-  }
+  const essaList = (await response.json()) as IEssa[];
 
   return essaList;
 };
 
 const buildEmbedFields = async (client: TClient, essaList: IEssa[]) => {
   const userPromises = essaList.map(async (essaField, index) => {
-    const user = await client.users.fetch(essaField.id);
+    const user = await client.users.fetch(essaField.User);
 
     return `${index <= 2 ? '> ###' : ''} ${index + 1}. ${user.username ?? fallback.USERNAME}: **${
-      essaField.essa
-    }%** essy - ${essaField.quote}`;
+      essaField.Value
+    }%** essy - ${essaField.Description}`;
   });
 
   const fields = await Promise.all(userPromises);

@@ -1,32 +1,49 @@
 import { env } from '@/env';
-import { fallback } from '@/lib/constants';
-import { logger } from '@/lib/utils';
-import { TClient, TCommand } from '@/types';
+import { fallback, janapiRoutes } from '@/lib/constants';
+import { IPersonOfTheDay, TClient, TCommand } from '@/types';
 import dayjs from 'dayjs';
 import { EmbedBuilder } from 'discord.js';
 
 export const command: TCommand = {
   name: 'cw',
   execute: async ({ client, message }) => {
-    const cwId = await getCwUserId();
+    const personOfTheDayId = await getPersonOfTheDayId();
 
-    if (!cwId) {
-      logger.error('There was an error during getting cw of the day.');
-      message.reply('Wystąpił błąd podczas pobierania cwela dnia xd');
+    if (personOfTheDayId) {
+      const personOfTheDayEmbed = await getPersonOfTheDayEmbed(client, personOfTheDayId);
+
+      message.reply({
+        embeds: [personOfTheDayEmbed],
+      });
+    } else {
+      await fetch(`${env.ESSA_API_URL}${janapiRoutes.personOfTheDay}`, {
+        headers: {
+          Authorization: `Bearer ${env.ESSA_API_KEY}`,
+        },
+        method: 'POST',
+      });
+
+      const generatedPersonOfTheDayId = await getPersonOfTheDayId();
+
+      if (generatedPersonOfTheDayId) {
+        const personOfTheDayEmbed = await getPersonOfTheDayEmbed(client, generatedPersonOfTheDayId);
+        message.reply({
+          embeds: [personOfTheDayEmbed],
+        });
+        return;
+      }
+
+      message.reply({
+        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu cwela dnia xd',
+      });
       return;
     }
-
-    const cwEmbed = await getCwEmbed(client, cwId);
-
-    message.reply({
-      embeds: [cwEmbed],
-    });
   },
   prefixRequired: true,
 };
 
-const getCwUserId = async (): Promise<string | null> => {
-  const response = await fetch(`${env.ESSA_API_URL}/cweldnia`, {
+const getPersonOfTheDayId = async (): Promise<string | null> => {
+  const response = await fetch(`${env.ESSA_API_URL}${janapiRoutes.personOfTheDay}`, {
     headers: {
       Authorization: `Bearer ${env.ESSA_API_KEY}`,
     },
@@ -37,19 +54,19 @@ const getCwUserId = async (): Promise<string | null> => {
     return null;
   }
 
-  const currentCwUserId = (await response.json()) as string | null;
+  const personOfTheDay = (await response.json()) as IPersonOfTheDay | null;
 
-  if (!currentCwUserId) {
+  if (!personOfTheDay) {
     return null;
   }
 
-  return currentCwUserId;
+  return personOfTheDay.User;
 };
 
-const getCwEmbed = async (client: TClient, userId: string) => {
-  const cw = await client.users.fetch(userId);
-  const username = cw.username ?? fallback.USERNAME;
-  const avatar = cw.avatarURL() ?? fallback.AVATAR;
+const getPersonOfTheDayEmbed = async (client: TClient, userId: string) => {
+  const personOfTheDay = await client.users.fetch(userId);
+  const username = personOfTheDay.username ?? fallback.USERNAME;
+  const avatar = personOfTheDay.avatarURL() ?? fallback.AVATAR;
 
   return new EmbedBuilder()
     .setTitle(`Cwel dnia | ${dayjs().format('DD/MM/YY')}`)
