@@ -7,6 +7,11 @@ export const fallback = {
 export const discordId = {
   GUILD_ID: '1046777564775067728',
   BOT_ID: '1054784342251024425',
+  MAIN_CHANNEL_ID: '1048729482627907624',
+  TEST_CHANNEL_ID: '1126048496194179142',
+  GUCCI_ROLE_ID: '1195704091389730826',
+  DEMONZ_ROLE_ID: '1196440907105435758',
+  OVERPOW_ROLE_ID: '1196440740994220094',
 } as const;
 
 export const discordEmote = {
@@ -22,4 +27,10 @@ export const janapiRoutes = {
   essa: '/essa',
   personOfTheDay: '/personoftheday',
   jakiJan: '/jakijan',
+} as const;
+
+export const streamerId = {
+  GUCCI: 36954803,
+  OVERPOW: '8822303',
+  DEMONZ: '106318725',
 } as const;

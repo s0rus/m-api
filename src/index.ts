@@ -1,5 +1,6 @@
 import { api } from '@/api';
 import '@/lib/discord-client';
+import '@/lib/stream-notifier';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';

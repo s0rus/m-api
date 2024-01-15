@@ -6,6 +6,10 @@ import type { Message } from 'discord.js';
 import { discordId } from './constants';
 import { db } from './db';
 
+export function getRoleMentionString(roleId: string) {
+  return `<@&${roleId}>`;
+}
+
 export function getTimeToReset() {
   const now = dayjs();
   const endOfDay = now.endOf('day');

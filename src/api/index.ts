@@ -9,7 +9,7 @@ api.get('/healthcheck', (c) => {
   return c.text('API Operational!');
 });
 
-api.use('/*', bearerAuth({ token: env.AUTH_TOKEN }));
+api.use('/*', bearerAuth({ token: env.MAPI_AUTH_TOKEN }));
 // api.route('/messages', messages);
 api.route('/wrapped', wrapped);
 

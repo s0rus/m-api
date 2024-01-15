@@ -8,6 +8,7 @@ services:
       target: production
     ports:
       - '5000:5000'
+      - '8000:8000'
     image: s0ruse/m-api-v2:latest
     environment:
       - TZ=Europe/Warsaw
@@ -16,4 +17,8 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - ESSA_API_URL=${ESSA_API_URL}
       - ESSA_API_KEY=${ESSA_API_KEY}
-      - AUTH_TOKEN=${AUTH_TOKEN}
+      - MAPI_AUTH_TOKEN=${MAPI_AUTH_TOKEN}
+      - MAPI_HOSTNAME=${MAPI_HOSTNAME}
+      - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
+      - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
+      - NOTIFIER_SECRET=${NOTIFIER_SECRET}
