@@ -1,3 +1,5 @@
+import { INotifierItem } from '@/types';
+
 export const fallback = {
   AVATAR: 'https://cdn.discordapp.com/embed/avatars/1.png',
   USERNAME: '<unknown user>',
@@ -9,9 +11,7 @@ export const discordId = {
   BOT_ID: '1054784342251024425',
   MAIN_CHANNEL_ID: '1048729482627907624',
   TEST_CHANNEL_ID: '1126048496194179142',
-  GUCCI_ROLE_ID: '1195704091389730826',
-  DEMONZ_ROLE_ID: '1196440907105435758',
-  OVERPOW_ROLE_ID: '1196440740994220094',
+  TEST_ROLE_ID: '1197515184596598884',
 } as const;
 
 export const discordEmote = {
@@ -29,8 +29,20 @@ export const janapiRoutes = {
   jakiJan: '/jakijan',
 } as const;
 
-export const streamerId = {
-  GUCCI: 36954803,
-  OVERPOW: '8822303',
-  DEMONZ: '106318725',
-} as const;
+export const streamNotifierList: INotifierItem[] = [
+  {
+    twitchId: 8822303,
+    twitchName: 'overpow',
+    notifyRoleId: '1196440740994220094',
+  },
+  {
+    twitchId: 36954803,
+    twitchName: 'h2p_gucio',
+    notifyRoleId: '1195704091389730826',
+  },
+  {
+    twitchId: 106318725,
+    twitchName: 'demonzz1',
+    notifyRoleId: '1196440907105435758',
+  },
+];

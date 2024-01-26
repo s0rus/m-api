@@ -43,3 +43,9 @@ export interface IJakiJan {
   CreatedAt: string;
   UpdatedAt: string;
 }
+
+export interface INotifierItem {
+  twitchId: number;
+  twitchName: string;
+  notifyRoleId: string;
+}

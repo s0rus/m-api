@@ -1,9 +1,11 @@
 import { env } from '@/env';
-import { ApiClient } from '@twurple/api';
+import { INotifierItem } from '@/types';
+import { ApiClient, HelixUser } from '@twurple/api';
 import { AppTokenAuthProvider } from '@twurple/auth';
 import { EventSubHttpListener, ReverseProxyAdapter } from '@twurple/eventsub-http';
 import { NgrokAdapter } from '@twurple/eventsub-ngrok';
-import { discordId, streamerId } from './constants';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, TextChannel } from 'discord.js';
+import { discordId, fallback, streamNotifierList } from './constants';
 import { DiscordClient } from './discord-client';
 import { getRoleMentionString, logger } from './utils';
 
@@ -21,7 +23,7 @@ function getDevAdapter() {
 function getProdAdapter() {
   return new ReverseProxyAdapter({
     hostName: env.MAPI_HOSTNAME,
-    port: 8000,
+    port: env.NODE_ENV === 'production' ? 8000 : 5000,
   });
 }
 
@@ -36,42 +38,64 @@ async function setupStreamNotifier() {
 
   listener.start();
 
-  listener.onVerify((e: boolean) => {
-    if (e) {
-      logger.info('Stream notifier is online!');
-    }
-  });
+  const channel = await DiscordClient.getInstance().channels.fetch(
+    env.NODE_ENV === 'production' ? discordId.MAIN_CHANNEL_ID : discordId.TEST_CHANNEL_ID
+  );
 
-  const gucciSub = listener.onStreamOnline(streamerId.GUCCI, async (_e) => {
-    const channel = await DiscordClient.getInstance().channels.fetch(
-      env.NODE_ENV === 'production' ? discordId.MAIN_CHANNEL_ID : discordId.TEST_CHANNEL_ID
-    );
-    if (channel?.isTextBased()) {
-      channel.send(`${getRoleMentionString(discordId.GUCCI_ROLE_ID)} Gucio odpalił streama!`);
-    }
-  });
+  streamNotifierList.forEach(async (streamer) => {
+    const onlineSub = listener.onStreamOnline(streamer.twitchId, async (e) => {
+      if (channel && channel.isTextBased()) {
+        if (env.NODE_ENV === 'development') {
+          await channel.send({
+            content: `${getRoleMentionString(discordId.TEST_ROLE_ID)} Stream notify for ${
+              streamer.twitchName
+            } works correctly!`,
+          });
+          return;
+        }
 
-  const demonzSub = listener.onStreamOnline(streamerId.DEMONZ, async (_e) => {
-    const channel = await DiscordClient.getInstance().channels.fetch(
-      env.NODE_ENV === 'production' ? discordId.MAIN_CHANNEL_ID : discordId.TEST_CHANNEL_ID
-    );
-    if (channel?.isTextBased()) {
-      channel.send(`${getRoleMentionString(discordId.DEMONZ_ROLE_ID)} Demonz odpalił streama!`);
-    }
-  });
+        const streamerTwitchInfo = await e.getBroadcaster();
+        await sendStreamNotifyMessage({
+          channel: channel as TextChannel,
+          streamerTwitchInfo,
+          streamer,
+        });
+      }
+    });
 
-  const overpowSub = listener.onStreamOnline(streamerId.OVERPOW, async (_e) => {
-    const channel = await DiscordClient.getInstance().channels.fetch(
-      env.NODE_ENV === 'production' ? discordId.MAIN_CHANNEL_ID : discordId.TEST_CHANNEL_ID
-    );
-    if (channel?.isTextBased()) {
-      channel.send(`${getRoleMentionString(discordId.OVERPOW_ROLE_ID)} Overpow odpalił streama!`);
+    onlineSub._verify();
+    if (onlineSub.verified) {
+      logger.info(`Stream notifier for ${streamer.twitchName} is online!`);
     }
+    logger.info(`[${streamer.twitchName} test command]: ${await onlineSub.getCliTestCommand()}`);
   });
-
-  logger.info(`[h2p_gucio listener test command]: ${await gucciSub.getCliTestCommand()}`);
-  logger.info(`[demonzz1 listener test command]: ${await demonzSub.getCliTestCommand()}`);
-  logger.info(`[overpow listener test command]: ${await overpowSub.getCliTestCommand()}`);
 }
 
 await setupStreamNotifier();
+
+async function sendStreamNotifyMessage({
+  channel,
+  streamerTwitchInfo,
+  streamer,
+}: {
+  channel: TextChannel;
+  streamerTwitchInfo: HelixUser;
+  streamer: INotifierItem;
+}) {
+  const streamLinkButton = new ButtonBuilder()
+    .setLabel('Oglądaj')
+    .setURL(`https://www.twitch.tv/${streamerTwitchInfo.name ?? streamer.twitchName}`)
+    .setStyle(ButtonStyle.Link);
+
+  const streamInfoEmbed = new EmbedBuilder()
+    .setThumbnail(streamerTwitchInfo.profilePictureUrl ?? fallback.AVATAR)
+    .setDescription(`## ${streamerTwitchInfo.name ?? streamer.twitchName} odpalił streama!`);
+
+  const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(streamLinkButton);
+
+  await channel.send({
+    content: `${getRoleMentionString(streamer.notifyRoleId)}`,
+    embeds: [streamInfoEmbed],
+    components: [actionRow],
+  });
+}
