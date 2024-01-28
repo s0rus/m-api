@@ -28,6 +28,8 @@ export const janapiRoutes = {
   personOfTheDay: '/personoftheday',
   jakiJan: '/jakijan',
   message: '/message',
+  chartUpdate: '/plot',
+  chart: '/static',
 } as const;
 
 export const streamNotifierList: INotifierItem[] = [

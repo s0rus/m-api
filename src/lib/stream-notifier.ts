@@ -43,31 +43,37 @@ async function setupStreamNotifier() {
   );
 
   streamNotifierList.forEach(async (streamer) => {
-    const onlineSub = listener.onStreamOnline(streamer.twitchId, async (e) => {
-      if (channel && channel.isTextBased()) {
-        if (env.NODE_ENV === 'development') {
-          await channel.send({
-            content: `${getRoleMentionString(discordId.TEST_ROLE_ID)} Stream notify for ${
-              streamer.twitchName
-            } works correctly!`,
+    try {
+      const onlineSub = listener.onStreamOnline(streamer.twitchId, async (e) => {
+        if (channel && channel.isTextBased()) {
+          if (env.NODE_ENV === 'development') {
+            await channel.send({
+              content: `${getRoleMentionString(discordId.TEST_ROLE_ID)} Stream notify for ${
+                streamer.twitchName
+              } works correctly!`,
+            });
+            return;
+          }
+
+          const streamerTwitchInfo = await e.getBroadcaster();
+          await sendStreamNotifyMessage({
+            channel: channel as TextChannel,
+            streamerTwitchInfo,
+            streamer,
           });
-          return;
         }
+      });
 
-        const streamerTwitchInfo = await e.getBroadcaster();
-        await sendStreamNotifyMessage({
-          channel: channel as TextChannel,
-          streamerTwitchInfo,
-          streamer,
-        });
-      }
-    });
+      // onlineSub._verify();
+      // if (onlineSub.verified) {
+      //   logger.info(`Stream notifier for ${streamer.twitchName} is online!`);
+      // }
 
-    onlineSub._verify();
-    if (onlineSub.verified) {
-      logger.info(`Stream notifier for ${streamer.twitchName} is online!`);
+      logger.info(`[${streamer.twitchName} test command]: ${await onlineSub.getCliTestCommand()}`);
+    } catch (error) {
+      const err = error as Error;
+      logger.error(err.message);
     }
-    logger.info(`[${streamer.twitchName} test command]: ${await onlineSub.getCliTestCommand()}`);
   });
 }
 
