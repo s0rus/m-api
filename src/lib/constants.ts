@@ -27,6 +27,7 @@ export const janapiRoutes = {
   essa: '/essa',
   personOfTheDay: '/personoftheday',
   jakiJan: '/jakijan',
+  message: '/message',
 } as const;
 
 export const streamNotifierList: INotifierItem[] = [

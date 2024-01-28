@@ -5,7 +5,7 @@ import { Client, Collection, EmbedType, Events, GatewayIntentBits, Partials } fr
 import fs from 'node:fs';
 import path from 'node:path';
 import { _WrappedManager } from './_wrapped/wrapped-manager';
-import handleAvatarUpdate, { logger } from './utils';
+import handleAvatarUpdate, { logger, postMessageLog } from './utils';
 
 export class DiscordClient {
   private static instance: TClient | null = null;
@@ -93,6 +93,8 @@ export class DiscordClient {
           if (message.mentions.users.size > 0 && !message.reference) {
             await _WrappedManager.incrementMentionCount(message.author.id, message.mentions.users.size);
           }
+
+          await postMessageLog(message);
         });
 
         client.on(Events.MessageReactionAdd, async (reaction, user) => {
