@@ -1,13 +1,13 @@
 import { env } from '@/env';
 import { janapiRoutes } from '@/lib/constants';
-import { logger } from '@/lib/utils';
+import { getMentionedUserId, logger } from '@/lib/utils';
 import { TCommand } from '@/types';
 
 export const command: TCommand = {
   name: 'wykres',
   execute: async ({ client, message }) => {
     try {
-      const mentionedUserId = message.mentions.users.first()?.id;
+      const mentionedUserId = getMentionedUserId(message);
       const messageAuthorId = message.author.id;
 
       await updateChartByUserId(mentionedUserId ?? messageAuthorId);

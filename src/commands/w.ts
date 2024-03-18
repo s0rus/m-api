@@ -4,14 +4,14 @@ import { EmbedBuilder, type Message } from 'discord.js';
 
 import { env } from '@/env';
 import { discordEmote, fallback } from '@/lib/constants';
-import { handleError, logger } from '@/lib/utils';
+import { getMentionedUserAvatar, getMentionedUserId, getMentionedUserUsername, handleError, logger } from '@/lib/utils';
 import type { TCommand } from '@/types';
 
 export const command: TCommand = {
   name: 'w',
   execute: async ({ client, message }) => {
     try {
-      const mentionedUserId = message.mentions.users.first()?.id;
+      const mentionedUserId = getMentionedUserId(message);
 
       if (mentionedUserId) {
         const { todayCount, allTimeCount } = await getMessageCountByUserId(mentionedUserId);
@@ -207,8 +207,8 @@ export const getMessageCountEmbed = ({
   type: 'individual' | 'global';
 }) => {
   if (type === 'individual') {
-    const username = message.mentions.users.first()?.username ?? fallback.USERNAME;
-    const avatar = message.mentions.users.first()?.avatarURL() ?? fallback.AVATAR;
+    const username = getMentionedUserUsername(message);
+    const avatar = getMentionedUserAvatar(message);
 
     return new EmbedBuilder()
       .setTitle(`Liczba wiadomości | ${dayjs().format('DD/MM/YY HH:mm')}`)
@@ -262,7 +262,7 @@ const getCountStatus = ({ todayCount, avgCount }: { todayCount: number | null; a
   if (todayCount >= avgCount) {
     return 'Norma wyrobiona 😮';
   } else if (todayCount >= avgCount / 2 && todayCount < avgCount) {
-    return 'Chujowo ale stabilnie ☝🏿';
+    return 'Słabo ale stabilnie ☝🏿';
   } else if (todayCount < avgCount / 2) {
     return 'Umieralnia 💀';
   }

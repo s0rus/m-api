@@ -4,11 +4,65 @@ import { Prisma } from '@prisma/client';
 import chalk from 'chalk';
 import dayjs from 'dayjs';
 import { Message } from 'discord.js';
-import { discordId, janapiRoutes } from './constants';
+import { discordId, fallback, janapiRoutes } from './constants';
 import { db } from './db';
 
 export function getRoleMentionString(roleId: string) {
   return `<@&${roleId}>`;
+}
+
+export function getMentionedUserId(message: Message) {
+  const isReply = message.reference;
+
+  if (!isReply) {
+    const user = message.mentions.users.first();
+    if (!user?.bot && user?.id) {
+      return user.id;
+    }
+    return null;
+  }
+
+  const user = message.mentions.users.at(1);
+  if (!user?.bot && user?.id) {
+    return user.id;
+  }
+  return null;
+}
+
+export function getMentionedUserUsername(message: Message) {
+  const isReply = message.reference;
+
+  if (!isReply) {
+    const user = message.mentions.users.first();
+    if (!user?.bot && user?.id) {
+      return user.username;
+    }
+    return fallback.USERNAME;
+  }
+
+  const user = message.mentions.users.at(1);
+  if (!user?.bot && user?.id) {
+    return user.username;
+  }
+  return fallback.USERNAME;
+}
+
+export function getMentionedUserAvatar(message: Message) {
+  const isReply = message.reference;
+
+  if (!isReply) {
+    const user = message.mentions.users.first();
+    if (!user?.bot && user?.id) {
+      return user.avatarURL();
+    }
+    return fallback.AVATAR;
+  }
+
+  const user = message.mentions.users.at(1);
+  if (!user?.bot && user?.id) {
+    return user.avatarURL();
+  }
+  return fallback.AVATAR;
 }
 
 export function getTimeToReset() {

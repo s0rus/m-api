@@ -1,14 +1,14 @@
 import { env } from '@/env';
 import { _WrappedManager } from '@/lib/_wrapped/wrapped-manager';
 import { fallback, janapiRoutes } from '@/lib/constants';
-import { getTimeToReset } from '@/lib/utils';
+import { getMentionedUserId, getTimeToReset } from '@/lib/utils';
 import type { IEssa, TClient, TCommand } from '@/types';
 import { EmbedBuilder } from 'discord.js';
 
 export const command: TCommand = {
   name: 'essa',
   execute: async ({ client, message }) => {
-    const mentionedUserId = message.mentions.users.first()?.id;
+    const mentionedUserId = getMentionedUserId(message);
     const messageAuthorId = message.author.id;
 
     const essaById = await getEssaByUserId(mentionedUserId ?? messageAuthorId);

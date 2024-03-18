@@ -1,5 +1,6 @@
 import { env } from '@/env';
 import { fallback, janapiRoutes } from '@/lib/constants';
+import { getMentionedUserId } from '@/lib/utils';
 import { IJakiJan, TClient, TCommand } from '@/types';
 import dayjs from 'dayjs';
 import { EmbedBuilder } from 'discord.js';
@@ -7,7 +8,7 @@ import { EmbedBuilder } from 'discord.js';
 export const command: TCommand = {
   name: 'jjj',
   execute: async ({ client, message }) => {
-    const mentionedUserId = message.mentions.users.first()?.id;
+    const mentionedUserId = getMentionedUserId(message);
     const messageAuthorId = message.author.id;
 
     const jj = await getJJ(mentionedUserId ?? messageAuthorId);
@@ -37,7 +38,7 @@ export const command: TCommand = {
       }
 
       message.reply({
-        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu cwela dnia xd',
+        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu osoby dnia xd',
       });
       return;
     }
