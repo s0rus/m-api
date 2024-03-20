@@ -115,7 +115,7 @@ export async function getMessageCountByUserId(userId: string) {
 }
 
 export async function incrementMessageCount(message: Message) {
-  if (env.NODE_ENV === 'development' && env.DATABASE_URL.startsWith('mysql')) {
+  if (env.NODE_ENV === 'development' && env.DATABASE_URL.startsWith('postgres')) {
     return;
   }
 

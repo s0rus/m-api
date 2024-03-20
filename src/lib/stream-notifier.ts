@@ -77,7 +77,7 @@ async function setupStreamNotifier() {
   });
 }
 
-await setupStreamNotifier();
+env.NODE_ENV === 'production' && (await setupStreamNotifier());
 
 async function sendStreamNotifyMessage({
   channel,
