@@ -18,6 +18,7 @@
     "@twurple/auth": "^7.0.7",
     "@twurple/eventsub-http": "^7.0.7",
     "@twurple/eventsub-ngrok": "^7.0.7",
+    "@vercel/og": "^0.6.2",
     "chalk": "^5.3.0",
     "dayjs": "^1.11.10",
     "discord.js": "^14.14.1",

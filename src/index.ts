@@ -1,4 +1,4 @@
-import { api } from '@/api';
+import { app } from '@/api';
 import '@/lib/discord-client';
 // import '@/lib/stream-notifier';
 import dayjs from 'dayjs';
@@ -12,8 +12,8 @@ dayjs.extend(customParseFormat);
 
 export default {
   port: 5000,
-  fetch: api.fetch,
+  fetch: app.fetch,
 } as {
   port: number;
-  fetch: typeof api.fetch;
+  fetch: typeof app.fetch;
 };
