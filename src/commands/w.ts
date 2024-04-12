@@ -5,40 +5,63 @@ import { EmbedBuilder, type Message } from 'discord.js';
 import { env } from '@/env';
 import { discordEmote, fallback } from '@/lib/constants';
 import { getMentionedUserAvatar, getMentionedUserId, getMentionedUserUsername, handleError, logger } from '@/lib/utils';
-import type { TCommand } from '@/types';
+import type { TClient, TCommand, TUserWithoutWrapped } from '@/types';
 
 export const command: TCommand = {
   name: 'w',
-  execute: async ({ client, message }) => {
+  execute: async ({ client, message, args }) => {
     try {
-      const mentionedUserId = getMentionedUserId(message);
+      switch (args[0]) {
+        case 'ranking':
+          const messageRankings = await getMessageRankings();
+          if (messageRankings) {
+            const rankingFields = await buildRankingFields(client, messageRankings);
 
-      if (mentionedUserId) {
-        const { todayCount, allTimeCount } = await getMessageCountByUserId(mentionedUserId);
+            message.reply({
+              embeds: [
+                new EmbedBuilder()
+                  .setTitle(`Ranking wiadomości z dnia ${dayjs().format('DD/MM/YY')}`)
+                  .setDescription(rankingFields)
+                  .setTimestamp(),
+              ],
+            });
+          } else {
+            message.reply({
+              content: 'Ranking jest pusty lub wystąpił błąd podczas pobierania.',
+            });
+          }
 
-        const messageCountEmbed = getMessageCountEmbed({
-          message,
-          firstValue: todayCount,
-          secondValue: allTimeCount,
-          type: 'individual',
-        });
+          break;
+        default:
+          const mentionedUserId = getMentionedUserId(message);
 
-        message.reply({
-          embeds: [messageCountEmbed],
-        });
-      } else {
-        const [todayCount, avgCount] = await Promise.all([fetchDayTotalCount(), getAverageMessageCount()]);
+          if (mentionedUserId) {
+            const { todayCount, allTimeCount } = await getMessageCountByUserId(mentionedUserId);
 
-        const messageCountEmbed = getMessageCountEmbed({
-          message,
-          firstValue: todayCount,
-          secondValue: avgCount,
-          type: 'global',
-        });
+            const messageCountEmbed = getMessageCountEmbed({
+              message,
+              firstValue: todayCount,
+              secondValue: allTimeCount,
+              type: 'individual',
+            });
 
-        message.reply({
-          embeds: [messageCountEmbed],
-        });
+            message.reply({
+              embeds: [messageCountEmbed],
+            });
+          } else {
+            const [todayCount, avgCount] = await Promise.all([fetchDayTotalCount(), getAverageMessageCount()]);
+
+            const messageCountEmbed = getMessageCountEmbed({
+              message,
+              firstValue: todayCount,
+              secondValue: avgCount,
+              type: 'global',
+            });
+
+            message.reply({
+              embeds: [messageCountEmbed],
+            });
+          }
       }
     } catch (error) {
       console.log(error);
@@ -268,4 +291,60 @@ const getCountStatus = ({ todayCount, avgCount }: { todayCount: number | null; a
   }
 
   return '--';
+};
+
+const getMessageRankings = async () => {
+  const userData = await db.user.findMany({
+    include: {
+      aggregations: {
+        where: {
+          date: {
+            equals: dayjs(new Date()).format('DD.MM.YYYY'),
+          },
+        },
+      },
+    },
+  });
+
+  // const sortedUserData = userData.sort((a, b) => b.totalMessageCount - a.totalMessageCount);
+  const sortedUserData = userData
+    .filter((user) => user.aggregations[0] && !user.name.toLocaleLowerCase().includes('bot'))
+    .sort((a, b) => b.aggregations[0].dayCount - a.aggregations[0].dayCount);
+
+  return sortedUserData;
+};
+
+const buildRankingFields = async (client: TClient, userList: TUserWithoutWrapped[]) => {
+  const fields = userList.map((user, index) => {
+    const todayMessageAggregation = user.aggregations[0];
+
+    if (!todayMessageAggregation) {
+      return null;
+    }
+
+    return `${index <= 2 ? '> ###' : ''} ${index + 1}. ${user.name ?? fallback.USERNAME}: **${
+      todayMessageAggregation.dayCount
+    }** wiadomości`;
+  });
+
+  // const userPromises = userList.map(async (userField, index) => {
+  //   const user = await client.users.fetch(userField.userId);
+
+  //   if (!user) {
+  //     return null;
+  //   }
+
+  //   const todayMessageAggregation = userField.aggregations[0];
+
+  //   if (!todayMessageAggregation || user.bot) {
+  //     return null;
+  //   }
+
+  //   return `${index <= 2 ? '> ###' : ''} ${index + 1}. ${userField.name ?? fallback.USERNAME}: **${
+  //     todayMessageAggregation.dayCount
+  //   }** wiadomości`;
+  // });
+
+  // const fields = await Promise.all(userPromises);
+  return fields.filter((field) => field !== null).join('\n');
 };

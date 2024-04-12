@@ -20,6 +20,66 @@ export type TExecute = ({
   args: string[];
 }) => Promise<void>;
 
+export interface IUser {
+  id: string;
+  userId: string;
+  avatar: string;
+  name: string;
+  totalMessageCount: number;
+  aggregations: IAggregations[];
+  userWrapped: IUserWrapped;
+}
+
+export type TUserWithoutWrapped = Omit<IUser, 'userWrapped'>;
+
+export interface IUserWrapped {
+  id: string;
+  userId: string;
+  user: IUser;
+  statAggregation: IStatAggregation;
+  essaAggregation: IEssa[];
+  commandAggregation: ICommandAggregation[];
+}
+
+export interface IStatAggregation {
+  id: string;
+  reactionCount: number;
+  attachmentCount: number;
+  gifCount: number;
+  replyCount: number;
+  mentionCount: number;
+
+  userWrappedId: string;
+  userWrapped: IUserWrapped;
+}
+
+export interface IEssaAggregation {
+  id: string;
+  createdAt: string;
+
+  date: string;
+  essa: number;
+
+  userWrappedId: string;
+  userWrapped: IUserWrapped;
+}
+
+export interface ICommandAggregation {
+  id: string;
+  commandName: string;
+  usageCount: number;
+
+  userWrappedId: string;
+  userWrapped: IUserWrapped;
+}
+
+export interface IAggregations {
+  id: string;
+  dayCount: number;
+  date: string;
+  userId: string;
+}
+
 export interface IEssa {
   ID: number;
   User: string;

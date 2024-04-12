@@ -94,6 +94,11 @@ export class DiscordClient {
             await _WrappedManager.incrementMentionCount(message.author.id, message.mentions.users.size);
           }
 
+          // ? TODO: UNCOMMENT WHEN READY
+          // if (containsTwitterPostLink(message.content)) {
+          //   await replaceTwitterPostLink(message);
+          // }
+
           await postMessageLog(message);
         });
 
