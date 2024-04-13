@@ -2,6 +2,13 @@ import { ImageResponse } from '@vercel/og';
 import { User } from 'discord.js';
 import path from 'node:path';
 
+// ? To send generated image on discord:
+// ?  const image = Bun.file(`${INTERNAL_DIR_URL}/w/${message.author.id}.png`);
+// ?  const buffer = Buffer.from(await image.arrayBuffer());
+// ?    message.reply({
+// ?    files: [buffer],
+// ?  });
+
 export const INTERNAL_DIR_URL = path.join(import.meta.dir, '/__internal');
 
 export async function generateImage(userId: string, username: string, user: User) {
