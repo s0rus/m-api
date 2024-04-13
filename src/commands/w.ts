@@ -4,8 +4,15 @@ import { EmbedBuilder, type Message } from 'discord.js';
 
 import { env } from '@/env';
 import { discordEmote, fallback } from '@/lib/constants';
-import { getMentionedUserAvatar, getMentionedUserId, getMentionedUserUsername, handleError, logger } from '@/lib/utils';
-import type { TClient, TCommand, TUserWithoutWrapped } from '@/types';
+import {
+  getMentionedUserAvatar,
+  getMentionedUserId,
+  getMentionedUserUsername,
+  getTimeToReset,
+  handleError,
+  logger,
+} from '@/lib/utils';
+import type { TCommand, TUserWithoutWrapped } from '@/types';
 
 export const command: TCommand = {
   name: 'w',
@@ -13,24 +20,30 @@ export const command: TCommand = {
     try {
       switch (args[0]) {
         case 'ranking':
-          const messageRankings = await getMessageRankings();
-          if (messageRankings) {
-            const rankingFields = await buildRankingFields(client, messageRankings);
+          const messageRankingData = await getDescendingMessageRanking();
+
+          if (messageRankingData) {
+            const mentionedUserId = getMentionedUserId(message);
+            const rankingFields = buildRankingFields(messageRankingData, mentionedUserId ?? message.author.id);
+
+            const { hours, minutes } = getTimeToReset();
 
             message.reply({
               embeds: [
                 new EmbedBuilder()
                   .setTitle(`Ranking wiadomości z dnia ${dayjs().format('DD/MM/YY')}`)
                   .setDescription(rankingFields)
+                  .setFooter({
+                    text: `Reset rankingu za: ${hours} godzin(y) i ${minutes} minut(y)`,
+                  })
                   .setTimestamp(),
               ],
             });
           } else {
             message.reply({
-              content: 'Ranking jest pusty lub wystąpił błąd podczas pobierania.',
+              content: 'Ranking jest pusty.',
             });
           }
-
           break;
         default:
           const mentionedUserId = getMentionedUserId(message);
@@ -64,7 +77,6 @@ export const command: TCommand = {
           }
       }
     } catch (error) {
-      console.log(error);
       const err = error as Error;
       logger.error(err.message);
       message.reply(`${discordEmote.OSTRZEZENIE} Wystąpił błąd podczas pobierania danych...`);
@@ -293,7 +305,7 @@ const getCountStatus = ({ todayCount, avgCount }: { todayCount: number | null; a
   return '--';
 };
 
-const getMessageRankings = async () => {
+const getDescendingMessageRanking = async () => {
   const userData = await db.user.findMany({
     include: {
       aggregations: {
@@ -306,7 +318,6 @@ const getMessageRankings = async () => {
     },
   });
 
-  // const sortedUserData = userData.sort((a, b) => b.totalMessageCount - a.totalMessageCount);
   const sortedUserData = userData
     .filter((user) => user.aggregations[0] && !user.name.toLocaleLowerCase().includes('bot'))
     .sort((a, b) => b.aggregations[0].dayCount - a.aggregations[0].dayCount);
@@ -314,37 +325,38 @@ const getMessageRankings = async () => {
   return sortedUserData;
 };
 
-const buildRankingFields = async (client: TClient, userList: TUserWithoutWrapped[]) => {
-  const fields = userList.map((user, index) => {
-    const todayMessageAggregation = user.aggregations[0];
+const buildRankingFields = (rankingData: TUserWithoutWrapped[], messageAuthorId: string) => {
+  function getFieldContent(user: TUserWithoutWrapped, index: number) {
+    return `${index + 1}. ${user.name ?? fallback.USERNAME}: **${user.aggregations[0].dayCount}** wiadomości`;
+  }
 
+  const topTenRankingData = rankingData.slice(0, 10);
+  const messageAuthorIndex = rankingData.findIndex((user) => user.userId === messageAuthorId);
+  const isMessageAuthorOutsideTopTen = messageAuthorIndex > 9;
+
+  const fields = topTenRankingData.map((user, index) => {
+    const todayMessageAggregation = user.aggregations[0];
     if (!todayMessageAggregation) {
       return null;
     }
 
-    return `${index <= 2 ? '> ###' : ''} ${index + 1}. ${user.name ?? fallback.USERNAME}: **${
-      todayMessageAggregation.dayCount
-    }** wiadomości`;
+    if (index <= 2) {
+      return `> ### ${getFieldContent(user, index)}`;
+    }
+
+    // ? Workaround for missing `4.` in the rankings on mobile
+    if (index === 3) {
+      return [`\u200b`, getFieldContent(user, index)].join('\n');
+    }
+
+    return getFieldContent(user, index);
   });
 
-  // const userPromises = userList.map(async (userField, index) => {
-  //   const user = await client.users.fetch(userField.userId);
+  if (isMessageAuthorOutsideTopTen && messageAuthorIndex) {
+    const user = rankingData[messageAuthorIndex];
 
-  //   if (!user) {
-  //     return null;
-  //   }
+    fields.push(`...`, getFieldContent(user, messageAuthorIndex));
+  }
 
-  //   const todayMessageAggregation = userField.aggregations[0];
-
-  //   if (!todayMessageAggregation || user.bot) {
-  //     return null;
-  //   }
-
-  //   return `${index <= 2 ? '> ###' : ''} ${index + 1}. ${userField.name ?? fallback.USERNAME}: **${
-  //     todayMessageAggregation.dayCount
-  //   }** wiadomości`;
-  // });
-
-  // const fields = await Promise.all(userPromises);
   return fields.filter((field) => field !== null).join('\n');
 };
