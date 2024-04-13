@@ -3,53 +3,129 @@ import { _WrappedManager } from '@/lib/_wrapped/wrapped-manager';
 import { fallback, janapiRoutes } from '@/lib/constants';
 import { getMentionedUserId, getTimeToReset } from '@/lib/utils';
 import type { IEssa, TClient, TCommand } from '@/types';
-import { EmbedBuilder } from 'discord.js';
+import dayjs from 'dayjs';
+import { EmbedBuilder, User } from 'discord.js';
 
 export const command: TCommand = {
   name: 'essa',
-  execute: async ({ client, message }) => {
-    const mentionedUserId = getMentionedUserId(message);
-    const messageAuthorId = message.author.id;
+  execute: async ({ client, message, args }) => {
+    try {
+      switch (args[0]) {
+        case 'ranking':
+          const essaList = await getEssaList();
 
-    const essaById = await getEssaByUserId(mentionedUserId ?? messageAuthorId);
+          if (essaList) {
+            const sortedEssaList = essaList.sort((a, b) => b.Value - a.Value);
+            const essaRankingFields = await buildRankingFields(client, sortedEssaList);
 
-    if (essaById) {
-      const essaEmbed = await getUserEssaEmbed(client, essaById);
+            const { hours, minutes } = getTimeToReset();
 
-      message.reply({
-        embeds: [essaEmbed],
-      });
+            const essaRankingEmbed = new EmbedBuilder()
+              .setTitle(`Ranking essy z dnia ${dayjs().format('DD/MM/YY')}`)
+              .setDescription(`${essaRankingFields}`)
+              .setFooter({
+                text: `Reset rankingu za: ${hours} godzin(y) i ${minutes} minut(y)`,
+              })
+              .setTimestamp();
 
-      await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, essaById.Value);
+            message.reply({
+              embeds: [essaRankingEmbed],
+            });
+            return;
+          } else {
+            message.reply({
+              content: 'Ranking jest pusty lub wystąpił błąd podczas pobierania.',
+            });
+            return;
+          }
+        default:
+          const mentionedUserId = getMentionedUserId(message);
+          const messageAuthorId = message.author.id;
 
-      return;
-    } else {
-      await fetch(`${env.ESSA_API_URL}${janapiRoutes.essa}/${mentionedUserId ?? messageAuthorId}`, {
-        headers: {
-          Authorization: `Bearer ${env.ESSA_API_KEY}`,
-        },
-        method: 'POST',
-      });
+          const essaById = await getEssaByUserId(mentionedUserId ?? messageAuthorId);
 
-      const generatedEssaById = await getEssaByUserId(mentionedUserId ?? messageAuthorId);
-      if (generatedEssaById) {
-        const essaEmbed = await getUserEssaEmbed(client, generatedEssaById);
+          if (essaById) {
+            const essaEmbed = await getUserEssaEmbed(client, essaById);
 
-        message.reply({
-          embeds: [essaEmbed],
-        });
+            message.reply({
+              embeds: [essaEmbed],
+            });
 
-        await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, generatedEssaById.Value);
-        return;
+            await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, essaById.Value);
+
+            return;
+          } else {
+            await fetch(`${env.ESSA_API_URL}${janapiRoutes.essa}/${mentionedUserId ?? messageAuthorId}`, {
+              headers: {
+                Authorization: `Bearer ${env.ESSA_API_KEY}`,
+              },
+              method: 'POST',
+            });
+
+            const generatedEssaById = await getEssaByUserId(mentionedUserId ?? messageAuthorId);
+            if (generatedEssaById) {
+              const essaEmbed = await getUserEssaEmbed(client, generatedEssaById);
+
+              message.reply({
+                embeds: [essaEmbed],
+              });
+
+              await _WrappedManager.upsertEssaAggregation(mentionedUserId ?? messageAuthorId, generatedEssaById.Value);
+              return;
+            }
+
+            message.reply({
+              content: 'Wystąpił nieoczekiwany błąd przy pobieraniu essy xd',
+            });
+            return;
+          }
       }
-
-      message.reply({
-        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu essy xd',
-      });
-      return;
-    }
+    } catch (error) {}
   },
   prefixRequired: true,
+};
+
+const getEssaList = async (): Promise<IEssa[] | null> => {
+  const response = await fetch(`${env.ESSA_API_URL}${janapiRoutes.essa}`, {
+    headers: {
+      Authorization: `Bearer ${env.ESSA_API_KEY}`,
+    },
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const essaList = (await response.json()) as IEssa[];
+
+  return essaList;
+};
+
+const buildRankingFields = async (client: TClient, essaList: IEssa[]) => {
+  function getFieldContent(user: User, index: number, essaField: IEssa) {
+    return `${index + 1}. ${user.username ?? fallback.USERNAME}: **${essaField.Value}%** essy - ${
+      essaField.Description
+    }`;
+  }
+
+  const userPromises = essaList.map(async (essaField, index) => {
+    const user = await client.users.fetch(essaField.User);
+
+    if (index <= 2) {
+      return `> ### ${getFieldContent(user, index, essaField)}`;
+    }
+
+    // ? Workaround for missing `4.` in the rankings on mobile
+    if (index === 3) {
+      return [`\u200b`, getFieldContent(user, index, essaField)].join('\n');
+    }
+
+    return getFieldContent(user, index, essaField);
+  });
+
+  const fields = await Promise.all(userPromises);
+  return fields.join('\n');
 };
 
 const getEssaByUserId = async (userId: string): Promise<IEssa | null> => {
