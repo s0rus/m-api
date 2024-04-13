@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   IMAGE_NAME: s0ruse/m-api
@@ -18,11 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install
-
-      - name: Build app
-        run: |
-          npm run build
+          bun install
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
