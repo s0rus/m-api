@@ -14,6 +14,7 @@ export const env = createEnv({
     TWITCH_CLIENT_SECRET: z.string().min(1),
     NOTIFIER_SECRET: z.string().min(1),
     __DEV__NGROK_TOKEN: z.string().optional(),
+    EXPLICIT_WORDS: z.string().optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

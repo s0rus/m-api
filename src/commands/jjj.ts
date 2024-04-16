@@ -38,7 +38,7 @@ export const command: TCommand = {
       }
 
       message.reply({
-        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu osoby dnia xd',
+        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu jjj xd',
       });
       return;
     }

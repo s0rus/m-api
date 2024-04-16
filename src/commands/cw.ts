@@ -34,7 +34,7 @@ export const command: TCommand = {
       }
 
       message.reply({
-        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu osoby dnia xd',
+        content: `Wystąpił nieoczekiwany błąd przy pobieraniu ${env.EXPLICIT_WORDS?.split(',')[1] ?? 'osoby'} dnia xd`,
       });
       return;
     }
@@ -69,7 +69,7 @@ const getPersonOfTheDayEmbed = async (client: TClient, userId: string) => {
   const avatar = personOfTheDay.avatarURL() ?? fallback.AVATAR;
 
   return new EmbedBuilder()
-    .setTitle(`Osoba dnia | ${dayjs().format('DD/MM/YY')}`)
+    .setTitle(`${env.EXPLICIT_WORDS?.split(',')[0] ?? 'Osoba'} dnia | ${dayjs().format('DD/MM/YY')}`)
     .setDescription(`## ${username}`)
     .setThumbnail(avatar);
 };
