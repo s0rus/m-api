@@ -105,10 +105,11 @@ export default async function handleAvatarUpdate(client: TClient, message: Messa
         where: { userId: user.id },
         data: {
           avatar: avatarUrl,
+          name: user.username,
         },
       });
 
-      logger.info(`Avatar for ${user.username} has been updated.`);
+      logger.info(`Avatar/Username for ${user.username} has been updated.`);
     }
   } catch (error) {
     const err = error as Error;

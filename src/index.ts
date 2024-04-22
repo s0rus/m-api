@@ -1,9 +1,13 @@
 import { app } from '@/api';
 import '@/lib/discord-client';
-import '@/lib/stream-notifier';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
+import { env } from './env';
+
+if (env.NODE_ENV === 'production') {
+  await import('@/lib/stream-notifier');
+}
 
 dayjs.extend(timezone);
 dayjs.tz.setDefault('Europe/Warsaw');
