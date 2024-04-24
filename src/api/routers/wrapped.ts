@@ -16,6 +16,12 @@ wrapped.get('/:userId', async (c) => {
     const guild = await DiscordClient.getInstance().guilds.fetch(discordId.GUILD_ID);
     const member = await guild.members.fetch(userId);
 
+    if (!member) {
+      return c.notFound();
+    }
+
+    const isUserBoosting = await guild.members.fetch(userId).then((u) => !!u.premiumSinceTimestamp);
+
     const user = await db.user.findUnique({
       where: {
         userId,
@@ -220,11 +226,6 @@ wrapped.get('/:userId', async (c) => {
     });
 
     const globalEssa = await db.essaAggregation.aggregate({
-      where: {
-        NOT: {
-          userWrappedId: userId,
-        },
-      },
       _avg: {
         essa: true,
       },
@@ -237,6 +238,7 @@ wrapped.get('/:userId', async (c) => {
         username: user.name,
         avatar: user.avatar,
         joinedTimestamp: member.joinedTimestamp,
+        isUserBoosting,
       },
       wrapped: {
         messages: {
