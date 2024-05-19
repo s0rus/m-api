@@ -15,11 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Migrated to Supabase
-- When checking someone's essa and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference.
-- When checking someone's essa chart and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference.
-- When checking someone's message count and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference.
-- When checking someone's JJJ and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference.
--
+- When checking someone's essa and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference
+- When checking someone's essa chart and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference
+- When checking someone's message count and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference
+- When checking someone's JJJ and replying to a message at the same time will now correctly take mentioned `userId` instead of the `userId` from the reply reference
+- Changed `/api/v2/public/messages` to return today's message count as well
 
 ### Fixed
 
