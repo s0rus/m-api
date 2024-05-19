@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `!w ranking` command which displays top 10 users with most messages, if the user who invoked the message is outside of the top 10 it will also display his message count and position in the ranking
+- Added public route `/api/v2/public/messages` which returns global message count
 
 ### Changed
 
