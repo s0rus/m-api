@@ -22,7 +22,7 @@ export const discordEmote = {
   OSTATNIA_SZANSA: '<:ostatniaszansa:1078048819075354715>',
   AHA: '<:aha:1047239820528853042>',
   JASPER_HAPPY: '<:jasperHappy:1047239809208426656>',
-  JASPER_WEIRD: '<:Weird:1047239828095389737>',
+  JASPER_WEIRD: '<:Weird:1243163283234492507>',
 } as const;
 
 export const janapiRoutes = {

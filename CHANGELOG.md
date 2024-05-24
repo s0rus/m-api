@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed github actions to work with bun to automatically build and push image to docker hub
+- Fixed missing `:Weird:` emote
 
 ### Removed
 
