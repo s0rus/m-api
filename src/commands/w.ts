@@ -4,14 +4,7 @@ import { EmbedBuilder, type Message } from 'discord.js';
 
 import { env } from '@/env';
 import { discordEmote, fallback } from '@/lib/constants';
-import {
-  getMentionedUserAvatar,
-  getMentionedUserId,
-  getMentionedUserUsername,
-  getTimeToReset,
-  handleError,
-  logger,
-} from '@/lib/utils';
+import { getMentionedUserAvatar, getMentionedUserId, getMentionedUserUsername, getTimeToReset, handleError, logger } from '@/lib/utils';
 import type { TCommand, TUserWithoutWrapped } from '@/types';
 
 export const command: TCommand = {
@@ -297,7 +290,7 @@ const getCountStatus = ({ todayCount, avgCount }: { todayCount: number | null; a
   if (todayCount >= avgCount) {
     return 'Norma wyrobiona 😮';
   } else if (todayCount >= avgCount / 2 && todayCount < avgCount) {
-    return 'Słabo ale stabilnie ☝🏿';
+    return `${env.EXPLICIT_WORDS?.split(',')[2]} ale stabilnie ☝🏿`;
   } else if (todayCount < avgCount / 2) {
     return 'Umieralnia 💀';
   }
