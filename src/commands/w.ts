@@ -290,7 +290,7 @@ const getCountStatus = ({ todayCount, avgCount }: { todayCount: number | null; a
   if (todayCount >= avgCount) {
     return 'Norma wyrobiona 😮';
   } else if (todayCount >= avgCount / 2 && todayCount < avgCount) {
-    return `${env.EXPLICIT_WORDS?.split(',')[2]} ale stabilnie ☝🏿`;
+    return `${env.EXPLICIT_WORDS?.split(',')[2] ?? 'Słabo'} ale stabilnie ☝🏿`;
   } else if (todayCount < avgCount / 2) {
     return 'Umieralnia 💀';
   }
