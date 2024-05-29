@@ -20,6 +20,7 @@ export class DiscordClient {
       DiscordClient.instance = new Client({
         intents: [
           GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMembers,
           GatewayIntentBits.GuildMessages,
           GatewayIntentBits.MessageContent,
           GatewayIntentBits.GuildMessageTyping,
@@ -52,9 +53,7 @@ export class DiscordClient {
 
           if (message.content.startsWith(this.COMMAND_PREFIX)) {
             const [commandName, ...args] = message.content.split(' ');
-            const prefixedCommand = this.getInstance().commands.get(
-              commandName.toLowerCase().replace(this.COMMAND_PREFIX, '')
-            );
+            const prefixedCommand = this.getInstance().commands.get(commandName.toLowerCase().replace(this.COMMAND_PREFIX, ''));
 
             if (prefixedCommand) {
               try {
@@ -66,9 +65,7 @@ export class DiscordClient {
                 await _WrappedManager.incrementCommandUsageCount(message.author.id, prefixedCommand.name);
               } catch (error) {
                 const err = error as Error;
-                logger.error(
-                  `Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed: ${err.message}`
-                );
+                logger.error(`Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed: ${err.message}`);
               }
             }
           }
