@@ -72,7 +72,7 @@ export const command: TCommand = {
     } catch (error) {
       const err = error as Error;
       logger.error(err.message);
-      message.reply(`${discordEmote.OSTRZEZENIE} Wystąpił błąd podczas pobierania danych...`);
+      message.reply(`${discordEmote.OSTRZEZENIE} Wystąpił błąd podczas pobierania danych o wiadomościach...`);
     }
   },
   prefixRequired: true,

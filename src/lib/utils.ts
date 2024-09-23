@@ -113,7 +113,7 @@ export default async function handleAvatarUpdate(client: TClient, message: Messa
     }
   } catch (error) {
     const err = error as Error;
-    logger.error(err.message);
+    logger.error(`[AVATAR-UPDATE-ERROR]: ${err.message}`);
   }
 }
 
@@ -136,7 +136,7 @@ export async function postMessageLog(message: Message) {
     }
   } catch (error) {
     const err = error as Error;
-    logger.error(err.message);
+    logger.error(`[MESSAGE-LOG-ERROR]: ${err.message}`);
   }
 }
 
@@ -163,6 +163,6 @@ export function handleError(e: unknown) {
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
     logger.error(e.message);
   } else {
-    logger.error(`There was unexpected error: ${e}`);
+    logger.error(`[UNEXPECTED-ERROR]: ${e}`);
   }
 }

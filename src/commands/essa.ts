@@ -1,7 +1,7 @@
 import { env } from '@/env';
 import { _WrappedManager } from '@/lib/_wrapped/wrapped-manager';
-import { fallback, janapiRoutes } from '@/lib/constants';
-import { getMentionedUserId, getTimeToReset } from '@/lib/utils';
+import { discordEmote, fallback, janapiRoutes } from '@/lib/constants';
+import { getMentionedUserId, getTimeToReset, logger } from '@/lib/utils';
 import type { IEssa, TClient, TCommand } from '@/types';
 import dayjs from 'dayjs';
 import { EmbedBuilder, User } from 'discord.js';
@@ -17,11 +17,12 @@ export const command: TCommand = {
           if (essaList) {
             const sortedEssaList = essaList.sort((a, b) => b.Value - a.Value);
             const essaRankingFields = await buildRankingFields(client, sortedEssaList);
+            const avgEssa = essaList.reduce((acc, curr) => acc + curr.Value, 0) / essaList.length;
 
             const { hours, minutes } = getTimeToReset();
 
             const essaRankingEmbed = new EmbedBuilder()
-              .setTitle(`Ranking essy z dnia ${dayjs().format('DD/MM/YY')}`)
+              .setTitle(`Ranking essy z dnia ${dayjs().format('DD/MM/YY')} (Średnia: ${parseFloat(avgEssa.toFixed(2))}%)`)
               .setDescription(`${essaRankingFields}`)
               .setFooter({
                 text: `Reset rankingu za: ${hours} godzin(y) i ${minutes} minut(y)`,
@@ -80,7 +81,11 @@ export const command: TCommand = {
             return;
           }
       }
-    } catch (error) {}
+    } catch (error) {
+      const err = error as Error;
+      logger.error(`[ESSA-ERROR]: ${err.message}`);
+      message.reply(`${discordEmote.OSTRZEZENIE} Wystąpił błąd podczas pobierania danych o essie...`);
+    }
   },
   prefixRequired: true,
 };
@@ -104,9 +109,7 @@ const getEssaList = async (): Promise<IEssa[] | null> => {
 
 const buildRankingFields = async (client: TClient, essaList: IEssa[]) => {
   function getFieldContent(user: User, index: number, essaField: IEssa) {
-    return `${index + 1}. ${user.username ?? fallback.USERNAME}: **${essaField.Value}%** essy - ${
-      essaField.Description
-    }`;
+    return `${index + 1}. ${user.username ?? fallback.USERNAME}: **${essaField.Value}%** essy - ${essaField.Description}`;
   }
 
   const userPromises = essaList.map(async (essaField, index) => {

@@ -48,9 +48,7 @@ async function setupStreamNotifier() {
         if (channel && channel.isTextBased()) {
           if (env.NODE_ENV === 'development') {
             await channel.send({
-              content: `${getRoleMentionString(discordId.TEST_ROLE_ID)} Stream notify for ${
-                streamer.twitchName
-              } works correctly!`,
+              content: `${getRoleMentionString(discordId.TEST_ROLE_ID)} Stream notify for ${streamer.twitchName} works correctly!`,
             });
             return;
           }
@@ -72,7 +70,7 @@ async function setupStreamNotifier() {
       logger.info(`[${streamer.twitchName} test command]: ${await onlineSub.getCliTestCommand()}`);
     } catch (error) {
       const err = error as Error;
-      logger.error(err.message);
+      logger.error(`[STREAM-NOTIFIER-ERROR]: ${err.message}`);
     }
   });
 }

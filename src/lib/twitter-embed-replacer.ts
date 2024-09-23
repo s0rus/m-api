@@ -23,6 +23,6 @@ export async function replaceTwitterPostLink(message: Message) {
     const fixedMessageContent = fixTwitterLinks(originalMessageContent);
     await message.channel.send(`${userMention(messageAuthorId)} wysłał: ${fixedMessageContent}`);
   } catch (error) {
-    logger.error(`Error while fixing twitter embed: ${error}`);
+    logger.error(`[X-EMBED-ERROR]: Error while fixing twitter embed: ${error}`);
   }
 }

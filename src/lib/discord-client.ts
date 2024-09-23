@@ -65,7 +65,9 @@ export class DiscordClient {
                 await _WrappedManager.incrementCommandUsageCount(message.author.id, prefixedCommand.name);
               } catch (error) {
                 const err = error as Error;
-                logger.error(`Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed: ${err.message}`);
+                logger.error(
+                  `[COMMAND-ERROR]: Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed: ${err.message}`
+                );
               }
             }
           }
@@ -104,7 +106,8 @@ export class DiscordClient {
             try {
               await reaction.fetch();
             } catch (error) {
-              console.error('Something went wrong when fetching the message:', error);
+              const err = error as Error;
+              logger.error(`[FETCH-REACTION-ERROR]: Something went wrong when fetching the message: ${err.message}`);
               return;
             }
           }
@@ -117,7 +120,8 @@ export class DiscordClient {
             try {
               await reaction.fetch();
             } catch (error) {
-              logger.error(`Something went wrong when fetching the message: ${error}`);
+              const err = error as Error;
+              logger.error(`[FETCH-REACTION-ERROR]: Something went wrong when fetching the message: ${err.message}`);
               return;
             }
           }
