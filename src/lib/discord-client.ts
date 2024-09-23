@@ -5,7 +5,7 @@ import { Client, Collection, EmbedType, Events, GatewayIntentBits, Partials } fr
 import fs from 'node:fs';
 import path from 'node:path';
 import { _WrappedManager } from './_wrapped/wrapped-manager';
-import handleAvatarUpdate, { logger, postMessageLog } from './utils';
+import handleAvatarUpdate, { logger } from './utils';
 
 export class DiscordClient {
   private static instance: TClient | null = null;
@@ -97,8 +97,6 @@ export class DiscordClient {
           // if (containsTwitterPostLink(message.content)) {
           //   await replaceTwitterPostLink(message);
           // }
-
-          await postMessageLog(message);
         });
 
         client.on(Events.MessageReactionAdd, async (reaction, user) => {
