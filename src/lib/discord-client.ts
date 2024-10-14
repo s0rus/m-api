@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { _WrappedManager } from './_wrapped/wrapped-manager';
 import handleAvatarUpdate, { logger } from './utils';
+import { containsXPostLink, replaceXPostLink } from './x-embed-replacer';
 
 export class DiscordClient {
   private static instance: TClient | null = null;
@@ -93,10 +94,9 @@ export class DiscordClient {
             await _WrappedManager.incrementMentionCount(message.author.id, message.mentions.users.size);
           }
 
-          // ? TODO: UNCOMMENT WHEN READY
-          // if (containsTwitterPostLink(message.content)) {
-          //   await replaceTwitterPostLink(message);
-          // }
+          if (containsXPostLink(message.content)) {
+            await replaceXPostLink(message);
+          }
         });
 
         client.on(Events.MessageReactionAdd, async (reaction, user) => {
