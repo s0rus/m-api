@@ -1,18 +1,26 @@
-import { incrementMessageCount } from '@/commands/w';
-import { env } from '@/env';
-import { TClient, TCommand } from '@/types';
-import { Client, Collection, EmbedType, Events, GatewayIntentBits, Partials } from 'discord.js';
-import fs from 'node:fs';
-import path from 'node:path';
-import { _WrappedManager } from './_wrapped/wrapped-manager';
-import handleAvatarUpdate, { logger } from './utils';
-import { containsXPostLink, replaceXPostLink } from './x-embed-replacer';
+import { incrementMessageCount } from "@/commands/w";
+import { env } from "@/env";
+import { TClient, TCommand } from "@/types";
+import {
+  Client,
+  Collection,
+  EmbedType,
+  Events,
+  GatewayIntentBits,
+  Partials,
+} from "discord.js";
+import fs from "node:fs";
+import path from "node:path";
+import { _WrappedManager } from "./_wrapped/wrapped-manager";
+import handleAvatarUpdate, { logger } from "./utils";
+import { containsXPostLink, replaceXPostLink } from "./x-embed-replacer";
 
 export class DiscordClient {
   private static instance: TClient | null = null;
   private static isSetup = false;
 
-  private static COMMAND_PREFIX = env.NODE_ENV === 'development' ? ('?' as const) : ('!' as const);
+  private static COMMAND_PREFIX =
+    env.NODE_ENV === "development" ? ("?" as const) : ("!" as const);
 
   private constructor() {}
 
@@ -40,21 +48,28 @@ export class DiscordClient {
 
       this.getInstance().commands = new Collection();
 
-      const commandsPath = path.join(import.meta.dir, '../commands');
+      const commandsPath = path.join(import.meta.dir, "../commands");
       const commandsFolder = fs.readdirSync(commandsPath);
 
       commandsFolder.forEach(async (file) => {
-        const { command }: { command: TCommand } = await import(`${commandsPath}/${file}`);
+        const { command }: { command: TCommand } = await import(
+          `${commandsPath}/${file}`
+        );
         this.getInstance().commands.set(command.name, command);
       });
 
       this.getInstance().on(Events.ClientReady, (client) => {
         client.on(Events.MessageCreate, async (message) => {
-          await Promise.all([incrementMessageCount(message), handleAvatarUpdate(this.getInstance(), message)]);
+          await Promise.all([
+            incrementMessageCount(message),
+            handleAvatarUpdate(this.getInstance(), message),
+          ]);
 
           if (message.content.startsWith(this.COMMAND_PREFIX)) {
-            const [commandName, ...args] = message.content.split(' ');
-            const prefixedCommand = this.getInstance().commands.get(commandName.toLowerCase().replace(this.COMMAND_PREFIX, ''));
+            const [commandName, ...args] = message.content.split(" ");
+            const prefixedCommand = this.getInstance().commands.get(
+              commandName.toLowerCase().replace(this.COMMAND_PREFIX, ""),
+            );
 
             if (prefixedCommand) {
               try {
@@ -63,11 +78,14 @@ export class DiscordClient {
                   message,
                   args,
                 });
-                await _WrappedManager.incrementCommandUsageCount(message.author.id, prefixedCommand.name);
+                await _WrappedManager.incrementCommandUsageCount(
+                  message.author.id,
+                  prefixedCommand.name,
+                );
               } catch (error) {
                 const err = error as Error;
                 logger.error(
-                  `[COMMAND-ERROR]: Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed: ${err.message}`
+                  `[COMMAND-ERROR]: Command ${this.COMMAND_PREFIX}${prefixedCommand.name} could not be executed: ${err.message}`,
                 );
               }
             }
@@ -78,20 +96,31 @@ export class DiscordClient {
           }
 
           if (message.attachments.size > 0) {
-            await _WrappedManager.incrementAttachmentCount(message.author.id, message.attachments.size);
+            await _WrappedManager.incrementAttachmentCount(
+              message.author.id,
+              message.attachments.size,
+            );
           }
 
           if (message.embeds.length > 0) {
             const gifCount = message.embeds.filter(
-              (embed) => embed.data.type === EmbedType.Image || embed.data.type === EmbedType.GIFV
+              (embed) =>
+                embed.data.type === EmbedType.Image ||
+                embed.data.type === EmbedType.GIFV,
             ).length;
             if (gifCount > 0) {
-              await _WrappedManager.incrementGifCount(message.author.id, gifCount);
+              await _WrappedManager.incrementGifCount(
+                message.author.id,
+                gifCount,
+              );
             }
           }
 
           if (message.mentions.users.size > 0 && !message.reference) {
-            await _WrappedManager.incrementMentionCount(message.author.id, message.mentions.users.size);
+            await _WrappedManager.incrementMentionCount(
+              message.author.id,
+              message.mentions.users.size,
+            );
           }
 
           if (containsXPostLink(message.content)) {
@@ -105,7 +134,9 @@ export class DiscordClient {
               await reaction.fetch();
             } catch (error) {
               const err = error as Error;
-              logger.error(`[FETCH-REACTION-ERROR]: Something went wrong when fetching the message: ${err.message}`);
+              logger.error(
+                `[FETCH-REACTION-ERROR]: Something went wrong when fetching the message: ${err.message}`,
+              );
               return;
             }
           }
@@ -119,7 +150,9 @@ export class DiscordClient {
               await reaction.fetch();
             } catch (error) {
               const err = error as Error;
-              logger.error(`[FETCH-REACTION-ERROR]: Something went wrong when fetching the message: ${err.message}`);
+              logger.error(
+                `[FETCH-REACTION-ERROR]: Something went wrong when fetching the message: ${err.message}`,
+              );
               return;
             }
           }
@@ -128,11 +161,13 @@ export class DiscordClient {
         });
       });
 
-      logger.info('Discord watcher is ready');
+      logger.info("Discord watcher is ready");
 
       this.isSetup = true;
     } else {
-      logger.warn('Discord watcher is already setup, please remove the duplicate setup call.');
+      logger.warn(
+        "Discord watcher is already setup, please remove the duplicate setup call.",
+      );
     }
   }
 }

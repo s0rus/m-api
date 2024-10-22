@@ -22,6 +22,7 @@ model User {
   aggregations      MessageAggregation[]
 
   userWrapped UserWrapped?
+  birthday    Birthday?
 }
 
 model MessageAggregation {
@@ -86,4 +87,15 @@ model CommandAggregation {
   userWrapped   UserWrapped @relation(fields: [userWrappedId], references: [userId])
 
   @@index([userWrappedId])
+}
+
+model Birthday {
+  id String @id @unique @default(cuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [userId])
+
+  day Int
+  month Int
+
+  @@index([userId])
 }
