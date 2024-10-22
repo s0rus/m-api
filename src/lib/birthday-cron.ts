@@ -50,7 +50,7 @@ async function populateBirthdayRoleList() {
     }
   });
 
-  notifyAboutBirthdays({
+  await notifyAboutBirthdays({
     client,
     birthdays: birthdayPeople,
   });
