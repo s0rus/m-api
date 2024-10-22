@@ -4,10 +4,10 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import timezone from "dayjs/plugin/timezone";
 import { env } from "./env";
-import "./lib/birthday-cron";
 
 if (env.NODE_ENV === "production") {
   await import("@/lib/stream-notifier");
+  await import("@/lib/birthday-cron");
 }
 
 dayjs.extend(timezone);
