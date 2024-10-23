@@ -1,10 +1,10 @@
-import { env } from '@/env';
-import { janapiRoutes } from '@/lib/constants';
-import { getMentionedUserId, logger } from '@/lib/utils';
-import { TCommand } from '@/types';
+import { env } from "@/env";
+import { janapiRoutes } from "@/lib/constants";
+import { getMentionedUserId, logger } from "@/lib/utils";
+import { TCommand } from "@/types";
 
 export const command: TCommand = {
-  name: 'wykres',
+  name: "wykres",
   execute: async ({ client, message }) => {
     try {
       const mentionedUserId = getMentionedUserId(message);
@@ -15,7 +15,7 @@ export const command: TCommand = {
       const chartUrl = getChartUrlByUserId(mentionedUserId ?? messageAuthorId);
 
       if (!isValidImage(chartUrl)) {
-        throw new Error('Invalid chart image url!');
+        throw new Error("Invalid chart image url!");
       }
 
       message.reply({
@@ -28,10 +28,19 @@ export const command: TCommand = {
     } catch (error) {
       const err = error as Error;
       logger.error(err.message);
-      message.reply('Wystąpił błąd podczas pobierania wykresu xd');
+      message.reply("Wystąpił błąd podczas pobierania wykresu xd");
     }
   },
   prefixRequired: true,
+  documentation: {
+    description: "Wyświetla wykres essy dla użytkownika.",
+    variants: [
+      {
+        usage: "<@user>",
+        description: "Wyświetla wykres essy oznaczonego użytkownika.",
+      },
+    ],
+  },
 };
 
 async function updateChartByUserId(userId: string) {
@@ -39,7 +48,7 @@ async function updateChartByUserId(userId: string) {
     headers: {
       Authorization: `Bearer ${env.ESSA_API_KEY}`,
     },
-    method: 'POST',
+    method: "POST",
   });
 }
 
@@ -51,5 +60,5 @@ async function isValidImage(imageUrl: string) {
   const res = await fetch(imageUrl);
   const buff = await res.blob();
 
-  return buff.type.startsWith('image/');
+  return buff.type.startsWith("image/");
 }

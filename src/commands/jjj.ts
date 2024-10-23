@@ -1,12 +1,12 @@
-import { env } from '@/env';
-import { fallback, janapiRoutes } from '@/lib/constants';
-import { getMentionedUserId } from '@/lib/utils';
-import { IJakiJan, TClient, TCommand } from '@/types';
-import dayjs from 'dayjs';
-import { EmbedBuilder } from 'discord.js';
+import { env } from "@/env";
+import { fallback, janapiRoutes } from "@/lib/constants";
+import { getMentionedUserId } from "@/lib/utils";
+import { IJakiJan, TClient, TCommand } from "@/types";
+import dayjs from "dayjs";
+import { EmbedBuilder } from "discord.js";
 
 export const command: TCommand = {
-  name: 'jjj',
+  name: "jjj",
   execute: async ({ client, message }) => {
     const mentionedUserId = getMentionedUserId(message);
     const messageAuthorId = message.author.id;
@@ -20,12 +20,15 @@ export const command: TCommand = {
         embeds: [jjEmbed],
       });
     } else {
-      await fetch(`${env.ESSA_API_URL}${janapiRoutes.jakiJan}/${mentionedUserId ?? messageAuthorId}`, {
-        headers: {
-          Authorization: `Bearer ${env.ESSA_API_KEY}`,
+      await fetch(
+        `${env.ESSA_API_URL}${janapiRoutes.jakiJan}/${mentionedUserId ?? messageAuthorId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${env.ESSA_API_KEY}`,
+          },
+          method: "POST",
         },
-        method: 'POST',
-      });
+      );
 
       const generatedJJ = await getJJ(mentionedUserId ?? messageAuthorId);
 
@@ -38,21 +41,33 @@ export const command: TCommand = {
       }
 
       message.reply({
-        content: 'Wystąpił nieoczekiwany błąd przy pobieraniu jjj xd',
+        content: "Wystąpił nieoczekiwany błąd przy pobieraniu jjj xd",
       });
       return;
     }
   },
   prefixRequired: true,
+  documentation: {
+    description: "Wyświetla jakim janem dzisiaj jest użytkownik.",
+    variants: [
+      {
+        usage: "<@user>",
+        description: "Wyświetla jakim janem dzisiaj jest oznaczony użytkownik.",
+      },
+    ],
+  },
 };
 
 const getJJ = async (userId: string): Promise<IJakiJan | null> => {
-  const response = await fetch(`${env.ESSA_API_URL}${janapiRoutes.jakiJan}/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${env.ESSA_API_KEY}`,
+  const response = await fetch(
+    `${env.ESSA_API_URL}${janapiRoutes.jakiJan}/${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${env.ESSA_API_KEY}`,
+      },
+      method: "GET",
     },
-    method: 'GET',
-  });
+  );
 
   if (!response.ok) {
     return null;
@@ -72,7 +87,7 @@ const getJJEmbed = async (client: TClient, jjUser: IJakiJan) => {
   const username = user.username ?? fallback.USERNAME;
 
   return new EmbedBuilder()
-    .setTitle(`Jakim Janem Jesteś | ${dayjs().format('DD/MM/YY')}`)
+    .setTitle(`Jakim Janem Jesteś | ${dayjs().format("DD/MM/YY")}`)
     .setDescription(`## ${username}`)
     .setThumbnail(jjUser.JakiJan);
 };

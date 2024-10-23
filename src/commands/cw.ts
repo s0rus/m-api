@@ -1,16 +1,19 @@
-import { env } from '@/env';
-import { fallback, janapiRoutes } from '@/lib/constants';
-import { IPersonOfTheDay, TClient, TCommand } from '@/types';
-import dayjs from 'dayjs';
-import { EmbedBuilder } from 'discord.js';
+import { env } from "@/env";
+import { fallback, janapiRoutes } from "@/lib/constants";
+import { IPersonOfTheDay, TClient, TCommand } from "@/types";
+import dayjs from "dayjs";
+import { EmbedBuilder } from "discord.js";
 
 export const command: TCommand = {
-  name: 'cw',
+  name: "cw",
   execute: async ({ client, message }) => {
     const personOfTheDayId = await getPersonOfTheDayId();
 
     if (personOfTheDayId) {
-      const personOfTheDayEmbed = await getPersonOfTheDayEmbed(client, personOfTheDayId);
+      const personOfTheDayEmbed = await getPersonOfTheDayEmbed(
+        client,
+        personOfTheDayId,
+      );
 
       message.reply({
         embeds: [personOfTheDayEmbed],
@@ -20,13 +23,16 @@ export const command: TCommand = {
         headers: {
           Authorization: `Bearer ${env.ESSA_API_KEY}`,
         },
-        method: 'POST',
+        method: "POST",
       });
 
       const generatedPersonOfTheDayId = await getPersonOfTheDayId();
 
       if (generatedPersonOfTheDayId) {
-        const personOfTheDayEmbed = await getPersonOfTheDayEmbed(client, generatedPersonOfTheDayId);
+        const personOfTheDayEmbed = await getPersonOfTheDayEmbed(
+          client,
+          generatedPersonOfTheDayId,
+        );
         message.reply({
           embeds: [personOfTheDayEmbed],
         });
@@ -34,21 +40,27 @@ export const command: TCommand = {
       }
 
       message.reply({
-        content: `Wystąpił nieoczekiwany błąd przy pobieraniu ${env.EXPLICIT_WORDS?.split(',')[1] ?? 'osoby'} dnia xd`,
+        content: `Wystąpił nieoczekiwany błąd przy pobieraniu ${env.EXPLICIT_WORDS?.split(",")[1] ?? "osoby"} dnia xd`,
       });
       return;
     }
   },
   prefixRequired: true,
+  documentation: {
+    description: `Wyświetla ${env.EXPLICIT_WORDS?.split(",")[1] ?? "osobę"} dnia.`,
+  },
 };
 
 const getPersonOfTheDayId = async (): Promise<string | null> => {
-  const response = await fetch(`${env.ESSA_API_URL}${janapiRoutes.personOfTheDay}`, {
-    headers: {
-      Authorization: `Bearer ${env.ESSA_API_KEY}`,
+  const response = await fetch(
+    `${env.ESSA_API_URL}${janapiRoutes.personOfTheDay}`,
+    {
+      headers: {
+        Authorization: `Bearer ${env.ESSA_API_KEY}`,
+      },
+      method: "GET",
     },
-    method: 'GET',
-  });
+  );
 
   if (!response.ok) {
     return null;
@@ -69,7 +81,9 @@ const getPersonOfTheDayEmbed = async (client: TClient, userId: string) => {
   const avatar = personOfTheDay.avatarURL() ?? fallback.AVATAR;
 
   return new EmbedBuilder()
-    .setTitle(`${env.EXPLICIT_WORDS?.split(',')[0] ?? 'Osoba'} dnia | ${dayjs().format('DD/MM/YY')}`)
+    .setTitle(
+      `${env.EXPLICIT_WORDS?.split(",")[0] ?? "Osoba"} dnia | ${dayjs().format("DD/MM/YY")}`,
+    )
     .setDescription(`## ${username}`)
     .setThumbnail(avatar);
 };

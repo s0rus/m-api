@@ -1,4 +1,4 @@
-import { Client, Collection, Message } from 'discord.js';
+import { Client, Collection, Message } from "discord.js";
 
 export type TClient = Client<boolean> & {
   commands: Collection<string, TCommand>;
@@ -8,6 +8,16 @@ export type TCommand = {
   name: string;
   execute: TExecute;
   prefixRequired: boolean;
+  documentation?: TDocumentation;
+};
+
+export type TDocumentation = {
+  name?: string;
+  description: string;
+  variants?: {
+    usage: string;
+    description: string;
+  }[];
 };
 
 export type TExecute = ({
@@ -30,7 +40,7 @@ export interface IUser {
   userWrapped: IUserWrapped;
 }
 
-export type TUserWithoutWrapped = Omit<IUser, 'userWrapped'>;
+export type TUserWithoutWrapped = Omit<IUser, "userWrapped">;
 
 export interface IUserWrapped {
   id: string;

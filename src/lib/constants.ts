@@ -26,6 +26,8 @@ export const discordEmote = {
   JASPER_WEIRD: "<:Weird:1243163283234492507>",
 } as const;
 
+export const EMBED_SPACER = "\u200b";
+
 export const janapiRoutes = {
   essa: "/essa",
   personOfTheDay: "/personoftheday",

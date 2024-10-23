@@ -70,6 +70,15 @@ export const command: TCommand = {
     }
   },
   prefixRequired: true,
+  documentation: {
+    description: "Wyświetla listę urodzin użytowników serwera.",
+    variants: [
+      {
+        usage: "<dzień>/<miesiąc>",
+        description: "Dodaje/zmienia datę urodzin dla użytkownika.",
+      },
+    ],
+  },
 };
 
 async function getBirthdays() {

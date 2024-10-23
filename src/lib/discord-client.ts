@@ -1,9 +1,10 @@
 import { incrementMessageCount } from "@/commands/w";
 import { env } from "@/env";
-import { TClient, TCommand } from "@/types";
+import { TClient, TCommand, TDocumentation } from "@/types";
 import {
   Client,
   Collection,
+  EmbedBuilder,
   EmbedType,
   Events,
   GatewayIntentBits,
@@ -51,11 +52,62 @@ export class DiscordClient {
       const commandsPath = path.join(import.meta.dir, "../commands");
       const commandsFolder = fs.readdirSync(commandsPath);
 
-      commandsFolder.forEach(async (file) => {
-        const { command }: { command: TCommand } = await import(
-          `${commandsPath}/${file}`
+      async function getCommands() {
+        const c = await Promise.all(
+          commandsFolder.map(async (file) => {
+            const { command }: { command: TCommand } = await import(
+              `${commandsPath}/${file}`
+            );
+            return command;
+          }),
         );
-        this.getInstance().commands.set(command.name, command);
+        return c;
+      }
+
+      const documentation: TDocumentation[] = [];
+
+      getCommands().then((commands) => {
+        commands.forEach((command) => {
+          this.getInstance().commands.set(command.name, command);
+          if (command.documentation) {
+            documentation.push({
+              name: command.name,
+              description: command.documentation.description,
+              variants: command.documentation.variants,
+            });
+          }
+        });
+      });
+
+      this.getInstance().commands.set("h", {
+        name: "h",
+        execute: async ({ client, message, args }) => {
+          const embed = new EmbedBuilder().setTitle("Komendy").setDescription(
+            documentation.length <= 0
+              ? "Brak dokumentacji komend."
+              : documentation
+                  .map((doc) => {
+                    const variants = doc.variants ?? [];
+
+                    if (variants.length > 0) {
+                      return `**${this.COMMAND_PREFIX}${doc.name}** - ${doc.description}\n${
+                        variants.length > 0 &&
+                        variants
+                          .map((variant) => {
+                            return `> **${this.COMMAND_PREFIX}${doc.name} ${variant.usage}** - ${variant.description}`;
+                          })
+                          .join("\n")
+                      }`;
+                    } else {
+                      return `**${this.COMMAND_PREFIX}${doc.name}** - ${doc.description}`;
+                    }
+                  })
+                  .join("\n\n"),
+          );
+
+          message.reply({ embeds: [embed] });
+        },
+        prefixRequired: true,
       });
 
       this.getInstance().on(Events.ClientReady, (client) => {
