@@ -28,7 +28,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/fluent-ffmpeg": "^2.1.26",
     "bun-types": "latest",
     "prisma": "^5.7.0"
   },
