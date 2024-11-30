@@ -5,7 +5,7 @@ import { TCommand } from "@/types";
 
 export const command: TCommand = {
   name: "wykres",
-  execute: async ({ client, message }) => {
+  execute: async ({ client: _client, message }) => {
     try {
       const mentionedUserId = getMentionedUserId(message);
       const messageAuthorId = message.author.id;

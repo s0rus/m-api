@@ -16,10 +16,10 @@ import type { TCommand, TUserWithoutWrapped } from "@/types";
 
 export const command: TCommand = {
   name: "w",
-  execute: async ({ client, message, args }) => {
+  execute: async ({ client: _client, message, args }) => {
     try {
       switch (args[0]) {
-        case "ranking":
+        case "ranking": {
           const messageRankingData = await getDescendingMessageRanking();
 
           if (messageRankingData) {
@@ -50,7 +50,8 @@ export const command: TCommand = {
             });
           }
           break;
-        default:
+        }
+        default: {
           const mentionedUserId = getMentionedUserId(message);
 
           if (mentionedUserId) {
@@ -84,6 +85,7 @@ export const command: TCommand = {
               embeds: [messageCountEmbed],
             });
           }
+        }
       }
     } catch (error) {
       const err = error as Error;

@@ -1,10 +1,10 @@
-import { fetchDayTotalCount } from '@/commands/w';
-import { db } from '@/lib/db';
-import { Hono } from 'hono';
+import { fetchDayTotalCount } from "@/commands/w";
+import { db } from "@/lib/db";
+import { Hono } from "hono";
 
 const messages = new Hono();
 
-messages.get('/', async (c) => {
+messages.get("/", async (c) => {
   try {
     const todayMessageCount = await fetchDayTotalCount();
 
@@ -14,16 +14,17 @@ messages.get('/', async (c) => {
       },
     });
 
-    const globalMessageCountAllTime = globalMessageCountAggregation._sum.totalMessageCount;
+    const globalMessageCountAllTime =
+      globalMessageCountAggregation._sum.totalMessageCount;
 
     return c.json({
       todayMessageCount,
       globalMessageCountAllTime,
     });
-  } catch (err) {
+  } catch (_err) {
     c.status(500);
     return c.json({
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 });

@@ -5,7 +5,7 @@ import { z } from "zod";
 
 export const command: TCommand = {
   name: "urodziny",
-  execute: async ({ client, message, args }) => {
+  execute: async ({ client: _client, message, args }) => {
     if (args[0]) {
       const birthdayRegex = /^(0?[1-9]|[12][0-9]|3[01])[./](0?[1-9]|1[0-2])$/;
       if (birthdayRegex.test(args[0])) {

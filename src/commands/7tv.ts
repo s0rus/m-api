@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { logger } from "@/lib/utils";
 import { TCommand } from "@/types";
 import { writeFile, rm } from "node:fs/promises";
@@ -5,7 +6,12 @@ import path from "node:path";
 
 export const command: TCommand = {
   name: "7tv",
-  execute: async ({ client, message, args }) => {
+  execute: async ({ client: _client, message, args }) => {
+    // TODO: Remove this when completed
+    if (env.NODE_ENV === "production") {
+      return;
+    }
+
     if (args[0]) {
       const uuid = crypto.randomUUID();
       const filePath = path.resolve(

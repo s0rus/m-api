@@ -81,7 +81,7 @@ export class DiscordClient {
 
       this.getInstance().commands.set("h", {
         name: "h",
-        execute: async ({ client, message, args }) => {
+        execute: async ({ client: _client, message, args: _args }) => {
           const embed = new EmbedBuilder().setTitle("Komendy").setDescription(
             documentation.length <= 0
               ? "Brak dokumentacji komend."

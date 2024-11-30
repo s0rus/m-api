@@ -11,7 +11,7 @@ export const command: TCommand = {
   execute: async ({ client, message, args }) => {
     try {
       switch (args[0]) {
-        case "ranking":
+        case "ranking": {
           const essaList = await getEssaList();
 
           if (essaList) {
@@ -47,7 +47,8 @@ export const command: TCommand = {
             });
             return;
           }
-        default:
+        }
+        default: {
           const mentionedUserId = getMentionedUserId(message);
           const messageAuthorId = message.author.id;
 
@@ -104,6 +105,7 @@ export const command: TCommand = {
             });
             return;
           }
+        }
       }
     } catch (error) {
       const err = error as Error;
