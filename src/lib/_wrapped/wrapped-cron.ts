@@ -10,9 +10,9 @@ import { discordId } from "../constants";
 import { logger } from "../utils";
 import { DiscordClient } from "../discord-client";
 
-cron.schedule("0 12 1 12 *", () => {
+cron.schedule("0 12 1 12 *", async () => {
   const client = DiscordClient.getInstance();
-  notifyAboutWrapped(client);
+  await notifyAboutWrapped(client);
 });
 
 async function notifyAboutWrapped(client: TClient) {
