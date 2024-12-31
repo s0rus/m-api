@@ -10,6 +10,8 @@ export const env = createEnv({
     DISCORD_BOT_TOKEN: z.string().min(1),
     ESSA_API_URL: z.string().url(),
     ESSA_API_KEY: z.string().min(1),
+    ESSA_API_V2_SUBDOMAIN: z.string().min(1),
+    ESSA_API_KEY_V2: z.string().min(1),
     TWITCH_CLIENT_ID: z.string().min(1),
     TWITCH_CLIENT_SECRET: z.string().min(1),
     NOTIFIER_SECRET: z.string().min(1),

@@ -121,13 +121,13 @@ export async function postMessageLog(message: Message) {
   try {
     if (message.content) {
       const messageData = {
-        user: message.author.id,
-        text: message.content,
+        discord_id: message.author.id,
+        content: message.content,
       };
 
-      await fetch(`${env.ESSA_API_URL}${janapiRoutes.message}`, {
+      await fetch(`${env.ESSA_API_V2_SUBDOMAIN}.${env.ESSA_API_URL}${janapiRoutes.message}`, {
         headers: {
-          Authorization: `Bearer ${env.ESSA_API_KEY}`,
+          Authorization: `Bearer ${env.ESSA_API_KEY_V2}`,
           'Content-Type': 'application/json',
         },
         method: 'POST',
