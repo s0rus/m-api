@@ -1,11 +1,11 @@
-import { env } from '@/env';
-import { TClient } from '@/types';
-import { Prisma } from '@prisma/client';
-import chalk from 'chalk';
-import dayjs from 'dayjs';
-import { Message } from 'discord.js';
-import { discordId, fallback, janapiRoutes } from './constants';
-import { db } from './db';
+import { env } from "@/env";
+import { TClient } from "@/types";
+import { Prisma } from "@prisma/client";
+import chalk from "chalk";
+import dayjs from "dayjs";
+import { Message } from "discord.js";
+import { discordId, fallback, janapiRoutes } from "./constants";
+import { db } from "./db";
 
 export function getRoleMentionString(roleId: string) {
   return `<@&${roleId}>`;
@@ -67,7 +67,7 @@ export function getMentionedUserAvatar(message: Message) {
 
 export function getTimeToReset() {
   const now = dayjs();
-  const endOfDay = now.endOf('day');
+  const endOfDay = now.endOf("day");
   const duration = endOfDay.diff(now);
 
   const hours = Math.floor(duration / (60 * 60 * 1000));
@@ -79,11 +79,14 @@ export function getTimeToReset() {
   };
 }
 
-export default async function handleAvatarUpdate(client: TClient, message: Message) {
+export default async function handleAvatarUpdate(
+  client: TClient,
+  message: Message,
+) {
   try {
     const guild = client.guilds.cache.get(discordId.GUILD_ID);
     if (!guild) {
-      throw new Error('Guild could not be found during avatar update.');
+      throw new Error("Guild could not be found during avatar update.");
     }
 
     const user = message.author;
@@ -125,14 +128,17 @@ export async function postMessageLog(message: Message) {
         content: message.content,
       };
 
-      await fetch(`${env.ESSA_API_V2_SUBDOMAIN}.${env.ESSA_API_URL}${janapiRoutes.message}`, {
-        headers: {
-          Authorization: `Bearer ${env.ESSA_API_KEY_V2}`,
-          'Content-Type': 'application/json',
+      await fetch(
+        `${env.ESSA_API_V2_SUBDOMAIN}.${env.ESSA_API_URL}${janapiRoutes.message}`,
+        {
+          headers: {
+            Authorization: `Bearer ${env.ESSA_API_KEY_V2}`,
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify(messageData),
         },
-        method: 'POST',
-        body: JSON.stringify(messageData),
-      });
+      );
     }
   } catch (error) {
     const err = error as Error;
@@ -142,19 +148,19 @@ export async function postMessageLog(message: Message) {
 
 export const logger = {
   info: (message: string) => {
-    console.log(`${chalk.bgBlueBright('[INFO]')}: ${message}`);
+    console.log(`${chalk.bgBlueBright("[INFO]")}: ${message}`);
   },
   warn: (message: string) => {
-    console.log(`${chalk.bgYellow.black('[WARN]')}: ${message}`);
+    console.log(`${chalk.bgYellow.black("[WARN]")}: ${message}`);
   },
   error: (message: string) => {
-    console.log(`${chalk.bgRedBright.black('[ERROR]')}: ${message}`);
+    console.log(`${chalk.bgRedBright.black("[ERROR]")}: ${message}`);
   },
   chatlog: (message: Message) => {
     console.log(
-      `${chalk.bgCyan.white(`[${dayjs(message.createdAt).format('DD/MM/YYYY hh:mm A')}]`)} ${chalk.bold.bgGrey.white(
-        message.author.username
-      )}: ${message.content}`
+      `${chalk.bgCyan.white(`[${dayjs(message.createdAt).format("DD/MM/YYYY hh:mm A")}]`)} ${chalk.bold.bgGrey.white(
+        message.author.username,
+      )}: ${message.content}`,
     );
   },
 };
