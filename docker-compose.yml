@@ -13,6 +13,7 @@ services:
       - TZ=Europe/Warsaw
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - ESSA_API_URL=${ESSA_API_URL}
       - ESSA_API_KEY=${ESSA_API_KEY}
