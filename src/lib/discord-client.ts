@@ -13,7 +13,7 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import { _WrappedManager } from "./_wrapped/wrapped-manager";
-import handleAvatarUpdate, { logger } from "./utils";
+import handleAvatarUpdate, { logger, postMessageLog } from "./utils";
 import { containsXPostLink, replaceXPostLink } from "./x-embed-replacer";
 
 export class DiscordClient {
@@ -115,7 +115,7 @@ export class DiscordClient {
           await Promise.all([
             incrementMessageCount(message),
             handleAvatarUpdate(this.getInstance(), message),
-            //postMessageLog(message),
+            postMessageLog(message),
           ]);
 
           if (message.content.startsWith(this.COMMAND_PREFIX)) {

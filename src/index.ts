@@ -8,7 +8,6 @@ import { env } from "./env";
 if (env.NODE_ENV === "production") {
   await import("@/lib/stream-notifier");
   await import("@/lib/birthday-cron");
-  await import("@/lib/_wrapped/wrapped-cron");
 }
 
 dayjs.extend(timezone);
