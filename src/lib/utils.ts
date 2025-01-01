@@ -128,17 +128,14 @@ export async function postMessageLog(message: Message) {
         content: message.content,
       };
 
-      await fetch(
-        `${env.ESSA_API_V2_SUBDOMAIN}.${env.ESSA_API_URL}${janapiRoutes.message}`,
-        {
-          headers: {
-            Authorization: `Bearer ${env.ESSA_API_KEY_V2}`,
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify(messageData),
+      await fetch(`${env.ESSA_API_V2_URL}/api/v1${janapiRoutes.message}`, {
+        headers: {
+          Authorization: `Bearer ${env.ESSA_API_KEY_V2}`,
+          "Content-Type": "application/json",
         },
-      );
+        method: "POST",
+        body: JSON.stringify(messageData),
+      });
     }
   } catch (error) {
     const err = error as Error;
