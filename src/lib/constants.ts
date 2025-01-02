@@ -35,6 +35,7 @@ export const janapiRoutes = {
   message: "/message",
   chartUpdate: "/plot",
   chart: "/static",
+  summarize: "/summarize",
 } as const;
 
 export const streamNotifierList: INotifierItem[] = [
