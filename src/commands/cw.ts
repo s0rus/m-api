@@ -1,44 +1,25 @@
 import { env } from "@/env";
-import { fallback, janapiRoutes } from "@/lib/constants";
-import { IPersonOfTheDay, TClient, TCommand } from "@/types";
+import { fallback } from "@/lib/constants";
+import { janapiV2 } from "@/lib/janapi";
+import { DCClient, DiscordCommand } from "@/types";
 import dayjs from "dayjs";
 import { EmbedBuilder } from "discord.js";
 
-export const command: TCommand = {
+export const command: DiscordCommand = {
   name: "cw",
   execute: async ({ client, message }) => {
-    const personOfTheDayId = await getPersonOfTheDayId();
+    const personOfTheDay = await janapiV2.get("/person");
 
-    if (personOfTheDayId) {
+    if (personOfTheDay) {
       const personOfTheDayEmbed = await getPersonOfTheDayEmbed(
         client,
-        personOfTheDayId,
+        personOfTheDay.discord_id,
       );
 
       message.reply({
         embeds: [personOfTheDayEmbed],
       });
     } else {
-      await fetch(`${env.ESSA_API_URL}${janapiRoutes.personOfTheDay}`, {
-        headers: {
-          Authorization: `Bearer ${env.ESSA_API_KEY}`,
-        },
-        method: "POST",
-      });
-
-      const generatedPersonOfTheDayId = await getPersonOfTheDayId();
-
-      if (generatedPersonOfTheDayId) {
-        const personOfTheDayEmbed = await getPersonOfTheDayEmbed(
-          client,
-          generatedPersonOfTheDayId,
-        );
-        message.reply({
-          embeds: [personOfTheDayEmbed],
-        });
-        return;
-      }
-
       message.reply({
         content: `Wystąpił nieoczekiwany błąd przy pobieraniu ${env.EXPLICIT_WORDS?.split(",")[1] ?? "osoby"} dnia xd`,
       });
@@ -51,31 +32,7 @@ export const command: TCommand = {
   },
 };
 
-const getPersonOfTheDayId = async (): Promise<string | null> => {
-  const response = await fetch(
-    `${env.ESSA_API_URL}${janapiRoutes.personOfTheDay}`,
-    {
-      headers: {
-        Authorization: `Bearer ${env.ESSA_API_KEY}`,
-      },
-      method: "GET",
-    },
-  );
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const personOfTheDay = (await response.json()) as IPersonOfTheDay | null;
-
-  if (!personOfTheDay) {
-    return null;
-  }
-
-  return personOfTheDay.User;
-};
-
-const getPersonOfTheDayEmbed = async (client: TClient, userId: string) => {
+const getPersonOfTheDayEmbed = async (client: DCClient, userId: string) => {
   const personOfTheDay = await client.users.fetch(userId);
   const username = personOfTheDay.username ?? fallback.USERNAME;
   const avatar = personOfTheDay.avatarURL() ?? fallback.AVATAR;

@@ -1,6 +1,6 @@
 import { incrementMessageCount } from "@/commands/w";
 import { env } from "@/env";
-import { TClient, TCommand, TDocumentation } from "@/types";
+import { DCClient, DiscordCommand, CommandDocs } from "@/types";
 import {
   Client,
   Collection,
@@ -17,7 +17,7 @@ import handleAvatarUpdate, { logger, postMessageLog } from "./utils";
 import { containsXPostLink, replaceXPostLink } from "./x-embed-replacer";
 
 export class DiscordClient {
-  private static instance: TClient | null = null;
+  private static instance: DCClient | null = null;
   private static isSetup = false;
 
   private static COMMAND_PREFIX =
@@ -25,7 +25,7 @@ export class DiscordClient {
 
   private constructor() {}
 
-  static getInstance(): TClient {
+  static getInstance(): DCClient {
     if (!DiscordClient.instance) {
       DiscordClient.instance = new Client({
         intents: [
@@ -38,7 +38,7 @@ export class DiscordClient {
           GatewayIntentBits.GuildEmojisAndStickers,
         ],
         partials: [Partials.Message, Partials.Channel, Partials.Reaction],
-      }) as TClient;
+      }) as DCClient;
     }
     return DiscordClient.instance;
   }
@@ -55,7 +55,7 @@ export class DiscordClient {
       async function getCommands() {
         const c = await Promise.all(
           commandsFolder.map(async (file) => {
-            const { command }: { command: TCommand } = await import(
+            const { command }: { command: DiscordCommand } = await import(
               `${commandsPath}/${file}`
             );
             return command;
@@ -64,7 +64,7 @@ export class DiscordClient {
         return c;
       }
 
-      const documentation: TDocumentation[] = [];
+      const documentation: CommandDocs[] = [];
 
       getCommands().then((commands) => {
         commands.forEach((command) => {

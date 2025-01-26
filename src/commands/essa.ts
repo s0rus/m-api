@@ -1,27 +1,31 @@
-import { env } from "@/env";
 import { _WrappedManager } from "@/lib/_wrapped/wrapped-manager";
-import { discordEmote, fallback, janapiRoutes } from "@/lib/constants";
+import { discordEmote, fallback } from "@/lib/constants";
+import { janapiV2 } from "@/lib/janapi";
 import { getMentionedUserId, getTimeToReset, logger } from "@/lib/utils";
-import type { IEssa, TClient, TCommand } from "@/types";
+import type { Essa, DCClient, DiscordCommand } from "@/types";
 import dayjs from "dayjs";
 import { EmbedBuilder, User } from "discord.js";
 
-export const command: TCommand = {
+export const command: DiscordCommand = {
   name: "essa",
   execute: async ({ client, message, args }) => {
     try {
       switch (args[0]) {
         case "ranking": {
-          const essaList = await getEssaList();
+          const essaList = await janapiV2.get("/essa");
 
           if (essaList) {
-            const sortedEssaList = essaList.sort((a, b) => b.Value - a.Value);
+            const sortedEssaList = essaList.sort(
+              (a, b) => b.essa_value - a.essa_value,
+            );
+
             const essaRankingFields = await buildRankingFields(
               client,
               sortedEssaList,
             );
+
             const avgEssa =
-              essaList.reduce((acc, curr) => acc + curr.Value, 0) /
+              essaList.reduce((acc, curr) => acc + curr.essa_value, 0) /
               essaList.length;
 
             const { hours, minutes } = getTimeToReset();
@@ -52,9 +56,11 @@ export const command: TCommand = {
           const mentionedUserId = getMentionedUserId(message);
           const messageAuthorId = message.author.id;
 
-          const essaById = await getEssaByUserId(
-            mentionedUserId ?? messageAuthorId,
-          );
+          const essaById = await janapiV2.get("/essa/:userId", {
+            userId: mentionedUserId ?? messageAuthorId,
+          });
+
+          console.log(essaById);
 
           if (essaById) {
             const essaEmbed = await getUserEssaEmbed(client, essaById);
@@ -65,41 +71,11 @@ export const command: TCommand = {
 
             await _WrappedManager.upsertEssaAggregation(
               mentionedUserId ?? messageAuthorId,
-              essaById.Value,
+              essaById.essa_value,
             );
 
             return;
           } else {
-            await fetch(
-              `${env.ESSA_API_URL}${janapiRoutes.essa}/${mentionedUserId ?? messageAuthorId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${env.ESSA_API_KEY}`,
-                },
-                method: "POST",
-              },
-            );
-
-            const generatedEssaById = await getEssaByUserId(
-              mentionedUserId ?? messageAuthorId,
-            );
-            if (generatedEssaById) {
-              const essaEmbed = await getUserEssaEmbed(
-                client,
-                generatedEssaById,
-              );
-
-              message.reply({
-                embeds: [essaEmbed],
-              });
-
-              await _WrappedManager.upsertEssaAggregation(
-                mentionedUserId ?? messageAuthorId,
-                generatedEssaById.Value,
-              );
-              return;
-            }
-
             message.reply({
               content: "Wystąpił nieoczekiwany błąd przy pobieraniu essy xd",
             });
@@ -131,30 +107,13 @@ export const command: TCommand = {
   },
 };
 
-const getEssaList = async (): Promise<IEssa[] | null> => {
-  const response = await fetch(`${env.ESSA_API_URL}${janapiRoutes.essa}`, {
-    headers: {
-      Authorization: `Bearer ${env.ESSA_API_KEY}`,
-    },
-    method: "GET",
-  });
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const essaList = (await response.json()) as IEssa[];
-
-  return essaList;
-};
-
-const buildRankingFields = async (client: TClient, essaList: IEssa[]) => {
-  function getFieldContent(user: User, index: number, essaField: IEssa) {
-    return `${index + 1}. ${user.username ?? fallback.USERNAME}: **${essaField.Value}%** essy - ${essaField.Description}`;
+const buildRankingFields = async (client: DCClient, essaList: Essa[]) => {
+  function getFieldContent(user: User, index: number, essaField: Essa) {
+    return `${index + 1}. ${user.username ?? fallback.USERNAME}: **${essaField.essa_value}%** essy - ${essaField.value_description}`;
   }
 
   const userPromises = essaList.map(async (essaField, index) => {
-    const user = await client.users.fetch(essaField.User);
+    const user = await client.users.fetch(essaField.discord_id);
 
     if (index <= 2) {
       return `> ### ${getFieldContent(user, index, essaField)}`;
@@ -168,44 +127,33 @@ const buildRankingFields = async (client: TClient, essaList: IEssa[]) => {
     return getFieldContent(user, index, essaField);
   });
 
-  const fields = await Promise.all(userPromises);
+  type FulfilledResult<T> = {
+    status: "fulfilled";
+    value: T;
+  };
+
+  const results = await Promise.allSettled(userPromises);
+
+  const fields = results
+    .filter(
+      (result): result is FulfilledResult<string> =>
+        result.status === "fulfilled",
+    )
+    .map((result) => result.value);
+
   return fields.join("\n");
 };
 
-const getEssaByUserId = async (userId: string): Promise<IEssa | null> => {
-  const response = await fetch(
-    `${env.ESSA_API_URL}${janapiRoutes.essa}/${userId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${env.ESSA_API_KEY}`,
-      },
-      method: "GET",
-    },
-  );
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const currentEssa = (await response.json()) as IEssa | null;
-
-  if (!currentEssa) {
-    return null;
-  }
-
-  return currentEssa;
-};
-
-const getUserEssaEmbed = async (client: TClient, essaData: IEssa) => {
-  const user = await client.users.fetch(essaData.User);
+const getUserEssaEmbed = async (client: DCClient, essaData: Essa) => {
+  const user = await client.users.fetch(essaData.discord_id);
 
   const { hours, minutes } = getTimeToReset();
 
   return new EmbedBuilder()
     .setTitle("Dzisiejsza essa:")
     .setDescription(
-      `> # ${essaData.Value}%  
-      ### ${essaData.Description}
+      `> # ${essaData.essa_value}%  
+      ### ${essaData.value_description}
       `,
     )
     .setAuthor({

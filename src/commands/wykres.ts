@@ -1,27 +1,24 @@
-import { env } from "@/env";
-import { janapiRoutes } from "@/lib/constants";
+import { janapiV2 } from "@/lib/janapi";
 import { getMentionedUserId, logger } from "@/lib/utils";
-import { TCommand } from "@/types";
+import { DiscordCommand } from "@/types";
 
-export const command: TCommand = {
+export const command: DiscordCommand = {
   name: "wykres",
   execute: async ({ client: _client, message }) => {
     try {
       const mentionedUserId = getMentionedUserId(message);
       const messageAuthorId = message.author.id;
 
-      await updateChartByUserId(mentionedUserId ?? messageAuthorId);
-
-      const chartUrl = getChartUrlByUserId(mentionedUserId ?? messageAuthorId);
-
-      if (!isValidImage(chartUrl)) {
-        throw new Error("Invalid chart image url!");
-      }
+      const chartBlob = await janapiV2.get("/chart/:userId", {
+        userId: mentionedUserId ?? messageAuthorId,
+      });
+      const chartBufferArr = await chartBlob.arrayBuffer();
+      const chartBuffer = Buffer.from(chartBufferArr);
 
       message.reply({
         files: [
           {
-            attachment: chartUrl,
+            attachment: chartBuffer,
           },
         ],
       });
@@ -42,23 +39,3 @@ export const command: TCommand = {
     ],
   },
 };
-
-async function updateChartByUserId(userId: string) {
-  await fetch(`${env.ESSA_API_URL}${janapiRoutes.chartUpdate}/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${env.ESSA_API_KEY}`,
-    },
-    method: "POST",
-  });
-}
-
-function getChartUrlByUserId(userId: string) {
-  return `${env.ESSA_API_URL}${janapiRoutes.chart}/${userId}.png`;
-}
-
-async function isValidImage(imageUrl: string) {
-  const res = await fetch(imageUrl);
-  const buff = await res.blob();
-
-  return buff.type.startsWith("image/");
-}

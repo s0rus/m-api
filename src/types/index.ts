@@ -1,17 +1,17 @@
 import { Client, Collection, Message } from "discord.js";
 
-export type TClient = Client<boolean> & {
-  commands: Collection<string, TCommand>;
+export type DCClient = Client<boolean> & {
+  commands: Collection<string, DiscordCommand>;
 };
 
-export type TCommand = {
+export type DiscordCommand = {
   name: string;
-  execute: TExecute;
+  execute: CommandProps;
   prefixRequired: boolean;
-  documentation?: TDocumentation;
+  documentation?: CommandDocs;
 };
 
-export type TDocumentation = {
+export type CommandDocs = {
   name?: string;
   description: string;
   variants?: {
@@ -20,38 +20,38 @@ export type TDocumentation = {
   }[];
 };
 
-export type TExecute = ({
+export type CommandProps = ({
   client,
   message,
   args,
 }: {
-  client: TClient;
+  client: DCClient;
   message: Message;
   args: string[];
 }) => Promise<void>;
 
-export interface IUser {
+export interface DiscordUser {
   id: string;
   userId: string;
   avatar: string;
   name: string;
   totalMessageCount: number;
-  aggregations: IAggregations[];
-  userWrapped: IUserWrapped;
+  aggregations: Aggregations[];
+  userWrapped: UserWrapped;
 }
 
-export type TUserWithoutWrapped = Omit<IUser, "userWrapped">;
+export type DiscordUserWithoutWrapped = Omit<DiscordUser, "userWrapped">;
 
-export interface IUserWrapped {
+export interface UserWrapped {
   id: string;
   userId: string;
-  user: IUser;
-  statAggregation: IStatAggregation;
-  essaAggregation: IEssa[];
-  commandAggregation: ICommandAggregation[];
+  user: DiscordUser;
+  statAggregation: StatAggregation;
+  essaAggregation: Essa[];
+  commandAggregation: CommandAggregation[];
 }
 
-export interface IStatAggregation {
+export interface StatAggregation {
   id: string;
   reactionCount: number;
   attachmentCount: number;
@@ -60,10 +60,10 @@ export interface IStatAggregation {
   mentionCount: number;
 
   userWrappedId: string;
-  userWrapped: IUserWrapped;
+  userWrapped: UserWrapped;
 }
 
-export interface IEssaAggregation {
+export interface EssaAggregation {
   id: string;
   createdAt: string;
 
@@ -71,51 +71,46 @@ export interface IEssaAggregation {
   essa: number;
 
   userWrappedId: string;
-  userWrapped: IUserWrapped;
+  userWrapped: UserWrapped;
 }
 
-export interface ICommandAggregation {
+export interface CommandAggregation {
   id: string;
   commandName: string;
   usageCount: number;
 
   userWrappedId: string;
-  userWrapped: IUserWrapped;
+  userWrapped: UserWrapped;
 }
 
-export interface IAggregations {
+export interface Aggregations {
   id: string;
   dayCount: number;
   date: string;
   userId: string;
 }
 
-export interface IEssa {
-  ID: number;
-  User: string;
-  Value: number;
-  Description: string;
-  CreatedAt: string;
-  UpdatedAt: string;
+export interface Essa {
+  discord_id: string;
+  essa_value: number;
+  value_description: string;
 }
 
-export interface IPersonOfTheDay {
-  ID: number;
-  User: string;
-  CreatedAt: string;
-  UpdatedAt: string;
+export interface PersonOfTheDay {
+  discord_id: string;
 }
 
-export interface IJakiJan {
-  ID: number;
-  User: string;
-  JakiJan: string;
-  CreatedAt: string;
-  UpdatedAt: string;
+export interface DailyEmote {
+  discord_id: string;
+  emote: string;
 }
 
-export interface INotifierItem {
+export interface StreamNotifierItem {
   twitchId: number;
   twitchName: string;
   notifyRoleId: string;
 }
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};

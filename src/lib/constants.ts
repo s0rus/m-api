@@ -1,4 +1,4 @@
-import { INotifierItem } from "@/types";
+import { StreamNotifierItem } from "@/types";
 
 export const fallback = {
   AVATAR: "https://cdn.discordapp.com/embed/avatars/1.png",
@@ -8,7 +8,7 @@ export const fallback = {
 
 export const discordId = {
   GUILD_ID: "1046777564775067728",
-  BOT_ID: "1054784342251024425",
+  BOT_ID: "1295322289415651378",
   PROBOT_ID: "282859044593598464",
   CBOT_ID: "1155092553067147336",
   BIRTHDAY_ROLE_ID: "1217053821759651942",
@@ -29,16 +29,11 @@ export const discordEmote = {
 export const EMBED_SPACER = "\u200b";
 
 export const janapiRoutes = {
-  essa: "/essa",
-  personOfTheDay: "/personoftheday",
-  jakiJan: "/jakijan",
   message: "/message",
-  chartUpdate: "/plot",
-  chart: "/static",
   summarize: "/summarize",
 } as const;
 
-export const streamNotifierList: INotifierItem[] = [
+export const streamNotifierList: StreamNotifierItem[] = [
   {
     twitchId: 8822303,
     twitchName: "overpow",

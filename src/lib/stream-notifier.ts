@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { INotifierItem } from "@/types";
+import { StreamNotifierItem } from "@/types";
 import { ApiClient, HelixUser } from "@twurple/api";
 import { AppTokenAuthProvider } from "@twurple/auth";
 import {
@@ -105,7 +105,7 @@ async function sendStreamNotifyMessage({
 }: {
   channel: TextChannel;
   streamerTwitchInfo: HelixUser;
-  streamer: INotifierItem;
+  streamer: StreamNotifierItem;
 }) {
   const streamLinkButton = new ButtonBuilder()
     .setLabel("Oglądaj")

@@ -1,10 +1,11 @@
 import { env } from "@/env";
 import { janapiRoutes } from "@/lib/constants";
-import { TCommand } from "@/types";
+import { DiscordCommand } from "@/types";
 
-export const command: TCommand = {
+export const command: DiscordCommand = {
   name: "tldr",
   execute: async ({ client: _client, message, args: _args }) => {
+    // TODO: Migrate this to janapi v2 client when it's ready
     const res = await fetch(
       `${env.ESSA_API_V2_URL}/api/v1${janapiRoutes.summarize}`,
       {

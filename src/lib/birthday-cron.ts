@@ -1,12 +1,12 @@
 import cron from "node-cron";
-import { DiscordClient } from "./discord-client";
 import { discordId } from "./constants";
 import { db } from "./db";
 import dayjs from "dayjs";
 import { logger } from "./utils";
 import { BirthdayWithUser } from "@/commands/urodziny";
 import { EmbedBuilder } from "discord.js";
-import { TClient } from "@/types";
+import { DCClient } from "@/types";
+import { DiscordClient } from "./discord-client";
 
 cron.schedule("0 1 * * *", async () => {
   try {
@@ -76,7 +76,7 @@ async function notifyAboutBirthdays({
   client,
   birthdays,
 }: {
-  client: TClient;
+  client: DCClient;
   birthdays: BirthdayWithUser[];
 }) {
   const channel = await client.channels.fetch(discordId.MAIN_CHANNEL_ID);

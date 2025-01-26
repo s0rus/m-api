@@ -1,11 +1,11 @@
-import { env } from "@/env";
-import { TClient } from "@/types";
+import { DCClient } from "@/types";
 import { Prisma } from "@prisma/client";
 import chalk from "chalk";
 import dayjs from "dayjs";
 import { Message } from "discord.js";
-import { discordId, fallback, janapiRoutes } from "./constants";
+import { discordId, fallback } from "./constants";
 import { db } from "./db";
+import { janapiV2 } from "./janapi";
 
 export function getRoleMentionString(roleId: string) {
   return `<@&${roleId}>`;
@@ -80,7 +80,7 @@ export function getTimeToReset() {
 }
 
 export default async function handleAvatarUpdate(
-  client: TClient,
+  client: DCClient,
   message: Message,
 ) {
   try {
@@ -128,14 +128,7 @@ export async function postMessageLog(message: Message) {
         content: message.content,
       };
 
-      await fetch(`${env.ESSA_API_V2_URL}/api/v1${janapiRoutes.message}`, {
-        headers: {
-          Authorization: `Bearer ${env.ESSA_API_KEY_V2}`,
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(messageData),
-      });
+      await janapiV2.post("/message", messageData);
     }
   } catch (error) {
     const err = error as Error;

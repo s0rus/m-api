@@ -1,4 +1,4 @@
-import { TClient } from "@/types";
+import { DCClient } from "@/types";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -15,7 +15,7 @@ cron.schedule("0 12 1 12 *", async () => {
   await notifyAboutWrapped(client);
 });
 
-async function notifyAboutWrapped(client: TClient) {
+async function notifyAboutWrapped(client: DCClient) {
   const channel = await client.channels.fetch(discordId.MAIN_CHANNEL_ID);
 
   if (channel && channel.isTextBased()) {
