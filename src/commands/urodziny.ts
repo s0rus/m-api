@@ -1,9 +1,9 @@
 import { db } from "@/lib/db";
-import type { TCommand } from "@/types";
+import type { DiscordCommand } from "@/types";
 import { EmbedBuilder } from "discord.js";
 import { z } from "zod";
 
-export const command: TCommand = {
+export const command: DiscordCommand = {
   name: "urodziny",
   execute: async ({ client: _client, message, args }) => {
     if (args[0]) {

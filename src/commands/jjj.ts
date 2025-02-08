@@ -1,5 +1,5 @@
 import { fallback } from "@/lib/constants";
-import { janapiV2 } from "@/lib/janapi";
+import { janapi } from "@/lib/janapi";
 import { getMentionedUserId } from "@/lib/utils";
 import { DailyEmote, DCClient, DiscordCommand } from "@/types";
 import dayjs from "dayjs";
@@ -11,7 +11,7 @@ export const command: DiscordCommand = {
     const mentionedUserId = getMentionedUserId(message);
     const messageAuthorId = message.author.id;
 
-    const jjj = await janapiV2.get("/dailyemote/:userId", {
+    const jjj = await janapi.get("/dailyemote/:userId", {
       userId: mentionedUserId ?? messageAuthorId,
     });
 

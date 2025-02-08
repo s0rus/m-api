@@ -24,6 +24,11 @@ type ApiRoutes = {
       content: string;
     };
   };
+  "/summarize": {
+    response: {
+      output: string;
+    };
+  };
 };
 
 type ApiOptions = {
@@ -113,14 +118,9 @@ type ApiClient<R extends ApiRoutes> = {
   ): Promise<R[K] extends { response: infer Res } ? Prettify<Res> : never>;
 };
 
-const janapiV1 = createJanapiClient({
+const janapi = createJanapiClient({
   baseUrl: env.ESSA_API_URL,
   apiKey: env.ESSA_API_KEY,
 });
 
-const janapiV2 = createJanapiClient({
-  baseUrl: `${env.ESSA_API_V2_URL}/api/v1`,
-  apiKey: env.ESSA_API_KEY_V2,
-});
-
-export { janapiV1, janapiV2 };
+export { janapi };

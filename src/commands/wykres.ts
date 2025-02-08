@@ -1,4 +1,4 @@
-import { janapiV2 } from "@/lib/janapi";
+import { janapi } from "@/lib/janapi";
 import { getMentionedUserId, logger } from "@/lib/utils";
 import { DiscordCommand } from "@/types";
 
@@ -9,7 +9,7 @@ export const command: DiscordCommand = {
       const mentionedUserId = getMentionedUserId(message);
       const messageAuthorId = message.author.id;
 
-      const chartBlob = await janapiV2.get("/chart/:userId", {
+      const chartBlob = await janapi.get("/chart/:userId", {
         userId: mentionedUserId ?? messageAuthorId,
       });
       const chartBufferArr = await chartBlob.arrayBuffer();

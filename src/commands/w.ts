@@ -12,9 +12,9 @@ import {
   handleError,
   logger,
 } from "@/lib/utils";
-import type { TCommand, TUserWithoutWrapped } from "@/types";
+import type { DiscordCommand, DiscordUserWithoutWrapped } from "@/types";
 
-export const command: TCommand = {
+export const command: DiscordCommand = {
   name: "w",
   execute: async ({ client: _client, message, args }) => {
     try {
@@ -367,10 +367,10 @@ const getDescendingMessageRanking = async () => {
 };
 
 const buildRankingFields = (
-  rankingData: TUserWithoutWrapped[],
+  rankingData: DiscordUserWithoutWrapped[],
   messageAuthorId: string,
 ) => {
-  function getFieldContent(user: TUserWithoutWrapped, index: number) {
+  function getFieldContent(user: DiscordUserWithoutWrapped, index: number) {
     return `${index + 1}. ${user.name ?? fallback.USERNAME}: **${user.aggregations[0].dayCount}** wiadomości`;
   }
 

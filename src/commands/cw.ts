@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import { fallback } from "@/lib/constants";
-import { janapiV2 } from "@/lib/janapi";
+import { janapi } from "@/lib/janapi";
+import { tryCatch } from "@/lib/utils";
 import { DCClient, DiscordCommand } from "@/types";
 import dayjs from "dayjs";
 import { EmbedBuilder } from "discord.js";
@@ -8,23 +9,32 @@ import { EmbedBuilder } from "discord.js";
 export const command: DiscordCommand = {
   name: "cw",
   execute: async ({ client, message }) => {
-    const personOfTheDay = await janapiV2.get("/person");
+    const { data: personOfTheDay, error } = await tryCatch(
+      janapi.get("/person"),
+    );
 
-    if (personOfTheDay) {
-      const personOfTheDayEmbed = await getPersonOfTheDayEmbed(
-        client,
-        personOfTheDay.discord_id,
-      );
-
-      message.reply({
-        embeds: [personOfTheDayEmbed],
-      });
-    } else {
+    if (error || !personOfTheDay?.discord_id) {
       message.reply({
         content: `Wystąpił nieoczekiwany błąd przy pobieraniu ${env.EXPLICIT_WORDS?.split(",")[1] ?? "osoby"} dnia xd`,
       });
-      return;
+
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error(
+        `Unknown error - body: ${JSON.stringify(personOfTheDay)}`,
+      );
     }
+
+    const personOfTheDayEmbed = await getPersonOfTheDayEmbed(
+      client,
+      personOfTheDay.discord_id,
+    );
+
+    message.reply({
+      embeds: [personOfTheDayEmbed],
+    });
   },
   prefixRequired: true,
   documentation: {

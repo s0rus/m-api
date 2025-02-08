@@ -1,6 +1,6 @@
 import { _WrappedManager } from "@/lib/_wrapped/wrapped-manager";
 import { discordEmote, fallback } from "@/lib/constants";
-import { janapiV2 } from "@/lib/janapi";
+import { janapi } from "@/lib/janapi";
 import { getMentionedUserId, getTimeToReset, logger } from "@/lib/utils";
 import type { Essa, DCClient, DiscordCommand } from "@/types";
 import dayjs from "dayjs";
@@ -12,7 +12,7 @@ export const command: DiscordCommand = {
     try {
       switch (args[0]) {
         case "ranking": {
-          const essaList = await janapiV2.get("/essa");
+          const essaList = await janapi.get("/essa");
 
           if (essaList) {
             const sortedEssaList = essaList.sort(
@@ -56,11 +56,9 @@ export const command: DiscordCommand = {
           const mentionedUserId = getMentionedUserId(message);
           const messageAuthorId = message.author.id;
 
-          const essaById = await janapiV2.get("/essa/:userId", {
+          const essaById = await janapi.get("/essa/:userId", {
             userId: mentionedUserId ?? messageAuthorId,
           });
-
-          console.log(essaById);
 
           if (essaById) {
             const essaEmbed = await getUserEssaEmbed(client, essaById);

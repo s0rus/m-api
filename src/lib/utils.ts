@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { Message } from "discord.js";
 import { discordId, fallback } from "./constants";
 import { db } from "./db";
-import { janapiV2 } from "./janapi";
+import { janapi } from "./janapi";
 
 export function getRoleMentionString(roleId: string) {
   return `<@&${roleId}>`;
@@ -128,7 +128,7 @@ export async function postMessageLog(message: Message) {
         content: message.content,
       };
 
-      await janapiV2.post("/message", messageData);
+      await janapi.post("/message", messageData);
     }
   } catch (error) {
     const err = error as Error;
@@ -154,6 +154,23 @@ export const logger = {
     );
   },
 };
+
+export async function tryCatch<T>(promise: Promise<T>): Promise<{
+  data?: T;
+  error?: Error;
+}> {
+  try {
+    const data = await promise;
+
+    return { data };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error };
+    }
+
+    return { error: new Error(String(error)) };
+  }
+}
 
 export function handleError(e: unknown) {
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
