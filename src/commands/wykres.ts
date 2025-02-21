@@ -9,16 +9,14 @@ export const command: DiscordCommand = {
       const mentionedUserId = getMentionedUserId(message);
       const messageAuthorId = message.author.id;
 
-      const chartBlob = await janapi.get("/chart/:userId", {
+      const chart = await janapi.get("/chart/:userId", {
         userId: mentionedUserId ?? messageAuthorId,
       });
-      const chartBufferArr = await chartBlob.arrayBuffer();
-      const chartBuffer = Buffer.from(chartBufferArr);
 
       message.reply({
         files: [
           {
-            attachment: chartBuffer,
+            attachment: chart.url,
           },
         ],
       });

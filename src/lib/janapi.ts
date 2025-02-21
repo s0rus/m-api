@@ -9,7 +9,9 @@ type ApiRoutes = {
     response: Essa;
   };
   "/chart/:userId": {
-    response: Blob;
+    response: {
+      url: string;
+    };
   };
   "/dailyemote/:userId": {
     response: DailyEmote;
