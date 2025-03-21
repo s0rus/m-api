@@ -111,6 +111,29 @@ export interface StreamNotifierItem {
   notifyRoleId: string;
 }
 
+export interface UserSummary {
+  date: string;
+  user_id: number;
+  message_stats: {
+    count: number;
+    peak_activity_hour: number;
+    longest_message_length: number;
+    average_length: number;
+  };
+  mood_analysis: {
+    primary_mood: string;
+    secondary_mood: string;
+    emotional_shifts: boolean;
+    emotion_triggers: string[];
+  };
+  content_insight: {
+    top_topics: string[];
+    recurring_themes: string[];
+    key_insights: string[];
+    communication_style: string;
+  };
+}
+
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};

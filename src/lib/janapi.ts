@@ -1,5 +1,11 @@
 import { env } from "@/env";
-import { DailyEmote, Essa, PersonOfTheDay, Prettify } from "@/types";
+import {
+  DailyEmote,
+  Essa,
+  PersonOfTheDay,
+  Prettify,
+  UserSummary,
+} from "@/types";
 
 type ApiRoutes = {
   "/essa": {
@@ -30,6 +36,9 @@ type ApiRoutes = {
     response: {
       output: string;
     };
+  };
+  "/summarize/user/:userId": {
+    response: UserSummary;
   };
 };
 
@@ -121,8 +130,8 @@ type ApiClient<R extends ApiRoutes> = {
 };
 
 const janapi = createJanapiClient({
-  baseUrl: env.ESSA_API_URL,
-  apiKey: env.ESSA_API_KEY,
+  baseUrl: env.JANAPI_URL,
+  apiKey: env.JANAPI_KEY,
 });
 
 export { janapi };

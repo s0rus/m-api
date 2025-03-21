@@ -115,8 +115,11 @@ export class DiscordClient {
           await Promise.all([
             incrementMessageCount(message),
             handleAvatarUpdate(this.getInstance(), message),
-            postMessageLog(message),
           ]);
+
+          if (env.NODE_ENV === "production") {
+            postMessageLog(message);
+          }
 
           if (message.content.startsWith(this.COMMAND_PREFIX)) {
             const [commandName, ...args] = message.content.split(" ");

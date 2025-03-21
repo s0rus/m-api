@@ -49,4 +49,9 @@ export const streamNotifierList: StreamNotifierItem[] = [
     twitchName: "demonzz1",
     notifyRoleId: "1196440907105435758",
   },
+  {
+    twitchId: 268563714,
+    twitchName: "fvlvte",
+    notifyRoleId: "1351970539912036352",
+  },
 ];

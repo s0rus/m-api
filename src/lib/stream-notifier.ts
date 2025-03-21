@@ -45,7 +45,7 @@ async function setupStreamNotifier() {
   const listener = new EventSubHttpListener({
     apiClient: twitchApiClient,
     adapter: env.NODE_ENV === "production" ? getProdAdapter() : getDevAdapter(),
-    secret: env.NOTIFIER_SECRET,
+    secret: env.TWITCH_NOTIFIER_SECRET,
   });
 
   listener.start();
