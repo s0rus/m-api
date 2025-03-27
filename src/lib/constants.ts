@@ -54,4 +54,9 @@ export const streamNotifierList: StreamNotifierItem[] = [
     twitchName: "fvlvte",
     notifyRoleId: "1351970539912036352",
   },
+  {
+    twitchId: 736170345,
+    twitchName: "klaun__0k",
+    notifyRoleId: "1351970539912036352",
+  },
 ];
